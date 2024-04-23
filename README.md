@@ -6,6 +6,7 @@
   Three JS:
   - https://github.com/mrdoob/three.js/blob/master/examples/webgl_decals.html
   - https://threejs.org
+  - https://www.youtube.com/watch?v=YK1Sw_hnm58
 
 - Drawing app with vanilla javascript, html, css: https://www.youtube.com/watch?v=y84tBZo8GFo
 - Drawing app using React.JS: https://www.youtube.com/playlist?list=PLSxgVLtIB0IFmQGuVMSE_wDHPW5rq4Ik7
