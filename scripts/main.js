@@ -3,20 +3,18 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 function main() {
-   
+    const container = document.querySelector("#container3D");
+  
+
     //setting up the scene
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    console.log(container.clientWidth)
     camera.position.z = 10;
     
     const renderer = new THREE.WebGLRenderer();
-    renderer.setSize( window.innerWidth, window.innerHeight);
-
-    //get the container3D from the DOM
-    const container = document.getElementById("container3D");
-    console.log(container)
-    container.appendChild(renderer.domElement);
-
+    renderer.setSize( container.clientWidth, container.clientHeight);
+  
     //setting up orbitcontrols
     const controls = new OrbitControls( camera, renderer.domElement );
     
@@ -25,7 +23,9 @@ function main() {
     const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
     const cube = new THREE.Mesh( geometry, material );
     scene.add( cube );
-    
+
+   
+    document.body.appendChild(renderer.domElement);
     //update frame
     animate();
     function animate() {
@@ -35,6 +35,7 @@ function main() {
         renderer.render(scene,camera);
     }
 }
+  
 
 main();
 
