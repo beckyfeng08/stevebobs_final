@@ -25,7 +25,7 @@ function main() {
     var meshes = addMeshes();
 
     //textures[i] corresponds to the texture on meshes[i] for i in meshes.length in the textures list
-    var textures = addTextures(meshes);
+    var textures = addTexturesOnMeshes(meshes);
 
     //lights is a list of lights in the scene
     var lights = addLights();
@@ -87,7 +87,7 @@ function main() {
         );
         return meshlist;
     }
-    function addTextures() {
+    function addTexturesOnMeshes(meshes) {
         // load a texture, set wrap mode to repeat
         var textures = []
         const texture = new THREE.TextureLoader().load( "../textures/spraypaint.jpg" );
@@ -95,6 +95,19 @@ function main() {
         texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set( 4, 4 );
         textures.push(texture);
+
+        //adding textures to meshes
+        //CURRENTLY FINDING HOW TO UPDATE MATERIALS ONTO MESHES, BUT WE MAY NEED TO DELETE THE PRIGINAL MESH AND
+        //MAKE A NEW ONE WITH THE NEW MATERIAL
+        //console.assert(meshes.length !== textures.length, "Size of meshes and textures array are not the same");
+        for (var i = 0; i < meshes.length; i++) {
+            meshes[i].material.needsUpdate = true;
+            meshes[i].uvsNeedUpdate = true;
+            meshes[i].material = new THREE.MeshPhongMaterial({
+                map: textures[i]
+            });
+        }
+
         return textures;
     }
     function createdatgui() {
