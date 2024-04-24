@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-
+const container = document.body;
+  
 function main() {
-    const container = document.querySelector("#container3D");
   
 
     //setting up the scene
@@ -24,18 +24,27 @@ function main() {
     const cube = new THREE.Mesh( geometry, material );
     scene.add( cube );
 
-   
     document.body.appendChild(renderer.domElement);
     //update frame
     animate();
     function animate() {
-
         requestAnimationFrame(animate);
         controls.update();
         renderer.render(scene,camera);
     }
+
+    window.addEventListener("resize", function() {
+        console.log("here")
+        var width = container.clientWidth;
+        var height = container.clientHeight;
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+    });
+    
 }
   
 
 main();
+
 
