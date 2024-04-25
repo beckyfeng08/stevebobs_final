@@ -22,7 +22,10 @@ const gui = new GUI();
 
 var meshes = [];
 var textures = [];
-var lights = []
+var lights = [];
+
+var meshesready = false;
+var texturesready = false;
 
 //main functions
 function preload() {
@@ -30,28 +33,26 @@ function preload() {
     
     //textures is a list of textures available to use, and populates the textures list
     addTextures();
-
-    //meshes is a list of meshes in the scene, and populates the meshes list
     addMeshes();
-
-    //lights is a list of lights in the scene, and populates the lights list
+     //lights is a list of lights in the scene, and populates the lights list
     addLights();
    
     //creates the menubar
     createdatgui();
+    //meshes is a list of meshes in the scene, and populates the meshes list
+   
 
 }
  
-function main() {
-    //assign the texture to each mesh (textures[i] to meshes[i])
-    assignTextures();
-    //updates each frame
-    animate();
-}
+
 
 //helper functions
 function animate() {
     requestAnimationFrame(animate);
+    if (meshesready && texturesready) {
+        //console.log("here")
+        assignTextures(); //uncommenting this would make the implementation slow, but will probably be necessary
+    }
     controls.update();
     renderer.render(scene,camera);
 }
@@ -78,10 +79,13 @@ function addMeshes() {
         '../models/cow.glb',
         function (gltf) {
             const modelGeometry = gltf.scene.children[0].geometry;
+            var loader = new THREE.TextureLoader();
+
             const material = new THREE.MeshPhongMaterial( {
-                color: 0x00ffff, 
+                color: 0x00ffff,
                 side: THREE.DoubleSide,
                 flatShading: true,
+                
 
             } );
             const modelMesh = new THREE.Mesh(modelGeometry,  material);
@@ -92,7 +96,7 @@ function addMeshes() {
         // if 100% means loaded
         function (xhr) {
             console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-            main();
+            meshesready = true
         },
         // an error callback
         function (error) {
@@ -102,30 +106,32 @@ function addMeshes() {
 }
 function addTextures() {
     // load a texture, set wrap mode to repeat
-    
-    const texture = new THREE.TextureLoader().load(
-        "spraypaint.jpg",
+    //seems like the onload callback isn't being run
+    var loader = new THREE.TextureLoader();
+    loader.crossOrigin = "";
+    const texture = loader.load(
+        "https://i.imgur.com/eCpD7bM.jpg",
          // onLoad callback
        function(texture) {
            // Texture loaded successfully
            console.log("Texture loaded successfully");
            // Here you can assign the texture to a material or perform other operations
-           
-           meshes[0].material = new THREE.MeshPhongMaterial( {
-            map: texture
-           });
+           texture.needsUpdate = true;
+            texturesready = true;
+
         }, 
+        
        // onError callback
        function(error) {
            // Error occurred while loading texture
-           console.log("Error loading texture:");
+           console.log("Error loading texture:", error);
        }
-    )    
+    )  
+    texture.encoding = THREE.sRGBEncoding;  
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     //texture.needsUpdate = true;
     texture.repeat.set( 4, 4 );
-    
     //debug the texture with a cube
    
     textures.push(texture)
@@ -153,9 +159,10 @@ function createdatgui() {
     })
 }
 function assignTextures() {
-    
     for (var i = 0; i < meshes.length; i++ ) {
-        meshes[i].material.map = textures[i];
+        meshes[i].material = new THREE.MeshPhongMaterial( {
+            map: textures[i]
+        });
         meshes[i].material.needsUpdate = true;
     }
 }
@@ -171,7 +178,7 @@ window.addEventListener("resize", function() {
 
 //calls
 preload();
-setTimeout(main, 200); //timeout is necessary bc it takes a second for mesh objects to load
+setTimeout(animate, 1000);
 
 //error functions
 function assertListsSameSize(list1, list2) {
