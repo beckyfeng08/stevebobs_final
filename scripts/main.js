@@ -20,15 +20,13 @@ const controls = new OrbitControls( camera, renderer.domElement );
 
 const gui = new GUI();
 
-var meshes = [];
-var textures = [];
-var lights = [];
+let meshes = [];
+let textures = [];
+let lights = [];
 
-var meshesready = false;
-var texturesready = false;
 
 //main functions
-function preload() {
+async function preload() {
     //textures is a list of textures available to use, and populates the textures list
     addTextures();
     addMeshes();
@@ -46,10 +44,7 @@ function preload() {
 //helper functions
 function animate() {
     requestAnimationFrame(animate);
-    if (meshesready && texturesready) {
-        //console.log("here")
-        assignTextures(); //uncommenting this would make the implementation slow, but will probably be necessary
-    }
+    //assignTextures(); //uncommenting this would make the implementation slow, but will probably be necessary
     controls.update();
     renderer.render(scene,camera);
 }
@@ -77,12 +72,9 @@ function addMeshes() {
         function (gltf) {
             const modelGeometry = gltf.scene.children[0].geometry;
             var loader = new THREE.TextureLoader();
-
             const material = new THREE.MeshPhongMaterial( {
-                color: 0x00ffff,
                 side: THREE.DoubleSide,
                 flatShading: true,
-                
 
             } );
             const modelMesh = new THREE.Mesh(modelGeometry,  material);
@@ -93,7 +85,7 @@ function addMeshes() {
         // if 100% means loaded
         function (xhr) {
             console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-            meshesready = true
+      
         },
         // an error callback
         function (error) {
@@ -114,7 +106,7 @@ function addTextures() {
            console.log("Texture loaded successfully");
            // Here you can assign the texture to a material or perform other operations
            texture.needsUpdate = true;
-            texturesready = true;
+ 
 
         }, 
         
@@ -157,10 +149,9 @@ function createdatgui() {
 }
 function assignTextures() {
     for (var i = 0; i < meshes.length; i++ ) {
-        meshes[i].material = new THREE.MeshPhongMaterial( {
-            map: textures[i]
-        });
-        meshes[i].material.needsUpdate = true;
+        meshes[i].material.map =  textures[i]
+        
+        meshes[i].material.map.needsUpdate = true;
     }
 }
 
@@ -174,8 +165,7 @@ window.addEventListener("resize", function() {
 });
 
 //calls
-preload();
-setTimeout(animate, 1000);
+preload().then(animate);
 
 //error functions
 function assertListsSameSize(list1, list2) {
