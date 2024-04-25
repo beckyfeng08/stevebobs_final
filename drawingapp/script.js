@@ -48,21 +48,33 @@ window.addEventListener("load", () => {
 //     ctx.closePath(); // closing path of a triangle so the third line draw automatically
 //     fillColor.checked ? ctx.fill() : ctx.stroke(); // if fillColor is checked fill triangle else draw border
 // }
+
 const startDraw = (e) => {
     isDrawing = true;
     prevMouseX = e.offsetX; // passing current mouseX position as prevMouseX value
     prevMouseY = e.offsetY; // passing current mouseY position as prevMouseY value
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    // ctx.arc(prevMouseX, prevMouseY, brushWidth/2.0, 0, 2*Math.PI); // for single click paint case
+    ctx.fillStyle = selectedColor; // passing selectedColor as fill style
+    // ctx.fill();
     ctx.beginPath(); // creating new path to draw
     ctx.lineWidth = brushWidth; // passing brushSize as line width
-    ctx.strokeStyle = selectedColor; // passing selectedColor as stroke style
-    ctx.fillStyle = selectedColor; // passing selectedColor as fill style
+    // ctx.strokeStyle = selectedColor; // passing selectedColor as stroke style
+    ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
+    ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
+    ctx.stroke(); // drawing/filling line with color
+
     // copying canvas data & passing as snapshot value.. this avoids dragging the image
     snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
 }
 const drawing = (e) => {
     if (!isDrawing) return; // if isDrawing is false return from here
     ctx.putImageData(snapshot, 0, 0); // adding copied canvas data on to this canvas
     if (selectedTool === "brush" || selectedTool === "eraser") {
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
         // if selected tool is eraser then set strokeStyle to white 
         // to paint white color on to the existing canvas content else set the stroke color to selected color
         ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
@@ -85,7 +97,17 @@ toolBtns.forEach(btn => {
         selectedTool = btn.id;
     });
 });
-sizeSlider.addEventListener("change", () => brushWidth = sizeSlider.value); // passing slider value as brushSize
+sizeSlider.addEventListener("change", () => { // passing slider value as brushSize
+    brushWidth = sizeSlider.value;
+}); 
+// brush size cursor display change
+document.onmousemove = function(e){
+    var circle = document.getElementById("circle");
+    circle.style.top = e.clientY+"px";
+    circle.style.left = e.clientX+"px";
+    circle.style.width = brushWidth+"px";
+    circle.style.height = brushWidth+"px";
+}
 colorBtns.forEach(btn => {
     btn.addEventListener("click", () => { // adding click event to all color button
         // removing selected class from the previous option and adding on current clicked option
@@ -112,4 +134,6 @@ saveImg.addEventListener("click", () => {
 });
 canvas.addEventListener("mousedown", startDraw);
 canvas.addEventListener("mousemove", drawing);
-canvas.addEventListener("mouseup", () => isDrawing = false);
+canvas.addEventListener("mouseup", () => {
+    isDrawing = false;
+});
