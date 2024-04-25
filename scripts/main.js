@@ -3,33 +3,46 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GUI } from 'dat.gui'
 
+const scene = new THREE.Scene();
+
+const container = document.body;
+
+
+const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+camera.position.z = 10;
+
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize( container.clientWidth, container.clientHeight);
+
+document.body.appendChild(renderer.domElement);
+
+var meshes = [];
+var textures = [];
+
 
   
-function main() {
-    //creating the main GUI
-    const container = document.body;
-    //setting up the scene
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.z = 10;
-    
-    const renderer = new THREE.WebGLRenderer();
-    renderer.setSize( container.clientWidth, container.clientHeight);
-    document.body.appendChild(renderer.domElement);
-
-
+function preload() {
     //setting up orbitcontrols
     const controls = new OrbitControls( camera, renderer.domElement );
     
     //meshes is a list of meshes in the scene
     var meshes = addMeshes();
+    
 
     //textures[i] corresponds to the texture on meshes[i] for i in meshes.length in the textures list
     var textures = addTexturesOnMeshes(meshes);
 
     //lights is a list of lights in the scene
     var lights = addLights();
-    
+    // scene.traverse(function(child) {
+    //     console.log(child)
+    //     if (child.isMesh) {
+    //     console.log("hello")  ;
+    //     }
+    //   });
+
+    console.log(scene.children);
+       
     //creates the menubar
     createdatgui();
     
@@ -74,17 +87,19 @@ function main() {
                 const modelMesh = new THREE.Mesh(modelGeometry,  material);
                 modelMesh.scale.set(5, 5, 5);
                 scene.add(modelMesh);
-                meshlist.push(modelMesh)
+                meshlist.push(modelMesh);
             },
             // if 100% means loaded
             function (xhr) {
                 console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                main();
             },
             // an error callback
             function (error) {
                 console.error('An error happened', error);
             }
         );
+        console.log(meshlist)
         return meshlist;
     }
     function addTexturesOnMeshes(meshes) {
@@ -100,12 +115,12 @@ function main() {
         //CURRENTLY FINDING HOW TO UPDATE MATERIALS ONTO MESHES, BUT WE MAY NEED TO DELETE THE PRIGINAL MESH AND
         //MAKE A NEW ONE WITH THE NEW MATERIAL
         //console.assert(meshes.length !== textures.length, "Size of meshes and textures array are not the same");
+        console.log(meshes)
+        console.log(textures)
         for (var i = 0; i < meshes.length; i++) {
+            
+            meshes[i].material.map = textures[i]
             meshes[i].material.needsUpdate = true;
-            meshes[i].uvsNeedUpdate = true;
-            meshes[i].material = new THREE.MeshPhongMaterial({
-                map: textures[i]
-            });
         }
 
         return textures;
@@ -145,8 +160,14 @@ function main() {
         camera.updateProjectionMatrix();
     });
 }
-  
+ 
+function main() {
+    //get a list of mesh objects
+    console.log(scene.children[3]);
+}
 
-main();
+preload();
 
+// wait a second
+setTimeout(main, 1000);
 
