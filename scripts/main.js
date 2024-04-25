@@ -29,8 +29,6 @@ var texturesready = false;
 
 //main functions
 function preload() {
-   
-    
     //textures is a list of textures available to use, and populates the textures list
     addTextures();
     addMeshes();
@@ -40,7 +38,6 @@ function preload() {
     //creates the menubar
     createdatgui();
     //meshes is a list of meshes in the scene, and populates the meshes list
-   
 
 }
  
@@ -76,7 +73,7 @@ function addMeshes() {
     const loader = new GLTFLoader();
     //loading the cow
     loader.load(
-        '../models/cow.glb',
+        '../models/cow_unwrapped.glb',
         function (gltf) {
             const modelGeometry = gltf.scene.children[0].geometry;
             var loader = new THREE.TextureLoader();
