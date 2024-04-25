@@ -26,11 +26,13 @@ var lights = []
 
 //main functions
 function preload() {
-    //meshes is a list of meshes in the scene, and populates the meshes list
-    addMeshes();
+   
     
     //textures is a list of textures available to use, and populates the textures list
     addTextures();
+
+    //meshes is a list of meshes in the scene, and populates the meshes list
+    addMeshes();
 
     //lights is a list of lights in the scene, and populates the lights list
     addLights();
@@ -40,10 +42,11 @@ function preload() {
 
 }
  
-
 function main() {
-      //updates each frame
-      animate();
+    //assign the texture to each mesh (textures[i] to meshes[i])
+    assignTextures();
+    //updates each frame
+    animate();
 }
 
 //helper functions
@@ -76,9 +79,10 @@ function addMeshes() {
         function (gltf) {
             const modelGeometry = gltf.scene.children[0].geometry;
             const material = new THREE.MeshPhongMaterial( {
-                color: 0x00ff00, 
+                color: 0x00ffff, 
                 side: THREE.DoubleSide,
-                flatShading: true
+                flatShading: true,
+
             } );
             const modelMesh = new THREE.Mesh(modelGeometry,  material);
             modelMesh.scale.set(5, 5, 5);
@@ -98,10 +102,32 @@ function addMeshes() {
 }
 function addTextures() {
     // load a texture, set wrap mode to repeat
-    const texture = new THREE.TextureLoader().load( "../textures/spraypaint.jpg" );
+    
+    const texture = new THREE.TextureLoader().load(
+        "spraypaint.jpg",
+         // onLoad callback
+       function(texture) {
+           // Texture loaded successfully
+           console.log("Texture loaded successfully");
+           // Here you can assign the texture to a material or perform other operations
+           
+           meshes[0].material = new THREE.MeshPhongMaterial( {
+            map: texture
+           });
+        }, 
+       // onError callback
+       function(error) {
+           // Error occurred while loading texture
+           console.log("Error loading texture:");
+       }
+    )    
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
+    //texture.needsUpdate = true;
     texture.repeat.set( 4, 4 );
+    
+    //debug the texture with a cube
+   
     textures.push(texture)
 }
 function createdatgui() {
@@ -126,6 +152,13 @@ function createdatgui() {
         color.b = value[2]/255;
     })
 }
+function assignTextures() {
+    
+    for (var i = 0; i < meshes.length; i++ ) {
+        meshes[i].material.map = textures[i];
+        meshes[i].material.needsUpdate = true;
+    }
+}
 
 //event listeners
 window.addEventListener("resize", function() {
@@ -140,4 +173,9 @@ window.addEventListener("resize", function() {
 preload();
 setTimeout(main, 200); //timeout is necessary bc it takes a second for mesh objects to load
 
-
+//error functions
+function assertListsSameSize(list1, list2) {
+    if (list1.length !== list2.length) {
+        throw new Error("Lists are not the same size");
+    }
+}
