@@ -1,11 +1,11 @@
 /* Import Google font - Poppins */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lunasima:wght@400;500;600&display=swap');
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Lunasima', serif;
 }
 
 body {
@@ -26,7 +26,7 @@ body {
 
 section {
     background: #fff;
-    border-radius: 7px;
+    border-radius: 5px;
 }
 
 .tools-board {
@@ -102,16 +102,17 @@ section {
         background-color: #000;
     }
 
-    .colors .option:nth-child(3) {
+    /* .colors .option:nth-child(3) {
         background-color: #E02020;
     }
 
     .colors .option:nth-child(4) {
         background-color: #6DD400;
-    }
+    } */
 
     .colors .option:nth-child(5) {
         background-color: #4A98F7;
+        border-radius: 5px;
     }
 
     .colors .option.selected::before {
@@ -130,6 +131,7 @@ section {
     .colors .option:first-child.selected::before {
         border-color: #ccc;
     }
+
 
 .option #color-picker {
     opacity: 0;
