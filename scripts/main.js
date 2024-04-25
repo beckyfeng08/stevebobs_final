@@ -3,6 +3,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GUI } from 'dat.gui'
 
+//importing local files
+import {threejsbrush} from './brush.js';
+
 //initializing the window and some important variables
 const scene = new THREE.Scene();
 
@@ -24,7 +27,10 @@ let meshes = [];
 let textures = [];
 let lights = [];
 
+let meshesready = false;
+let texturesready = true;
 
+let Brush;
 //main functions
 async function preload() {
     //textures is a list of textures available to use, and populates the textures list
@@ -32,21 +38,29 @@ async function preload() {
     addMeshes();
      //lights is a list of lights in the scene, and populates the lights list
     addLights();
-   
     //creates the menubar
     createdatgui();
     //meshes is a list of meshes in the scene, and populates the meshes list
-
+    setTimeout(()=>"waiting to load", 1000);
 }
  
-
-
 //helper functions
 function animate() {
     requestAnimationFrame(animate);
-    //assignTextures(); //uncommenting this would make the implementation slow, but will probably be necessary
+
+    //wait for everything to finish loading 
+    //before we initialize a brush and assign textures
+    if ( meshesready && texturesready) {
+        console.log(meshesready, texturesready)
+        assignTextures();
+        Brush = new threejsbrush(scene, camera, renderer, 1);
+        //so threejsbrush doesn't get reinitiailized
+        meshesready = false;
+        texturesready = false;
+    }
     controls.update();
     renderer.render(scene,camera);
+
 }
 function addLights() {
     // Adding lighting
@@ -84,15 +98,16 @@ function addMeshes() {
         },
         // if 100% means loaded
         function (xhr) {
-            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-      
+            console.log("Mesh loaded successfully");
+            meshesready = true;
         },
         // an error callback
         function (error) {
             console.error('An error happened', error);
-        }
-    );
+        });
+
 }
+
 function addTextures() {
     // load a texture, set wrap mode to repeat
     //seems like the onload callback isn't being run
@@ -106,7 +121,7 @@ function addTextures() {
            console.log("Texture loaded successfully");
            // Here you can assign the texture to a material or perform other operations
            texture.needsUpdate = true;
- 
+           texturesready = true;
 
         }, 
         
@@ -145,12 +160,14 @@ function createdatgui() {
         color.r = value[0]/255;
         color.g = value[1]/255;
         color.b = value[2]/255;
+        Brush.setBrushColor(color);
     })
 }
 function assignTextures() {
+    //console.log("poo")
     for (var i = 0; i < meshes.length; i++ ) {
         meshes[i].material.map =  textures[i]
-        
+        //console.log("hi")
         meshes[i].material.map.needsUpdate = true;
     }
 }
