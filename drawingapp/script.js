@@ -25,6 +25,13 @@ window.addEventListener("load", () => {
     canvas.height = canvas.offsetHeight;
     setCanvasBackground();
 });
+
+window.addEventListener("resize", () => {
+    // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    // setCanvasBackground();
+});
 // const drawRect = (e) => {
 //     // if fillColor isn't checked draw a rect with border else draw rect with background
 //     if (!fillColor.checked) {
@@ -59,9 +66,11 @@ const startDraw = (e) => {
     ctx.fillStyle = selectedColor; // passing selectedColor as fill style
     // ctx.fill();
     ctx.beginPath(); // creating new path to draw
+
     ctx.lineWidth = brushWidth; // passing brushSize as line width
     // ctx.strokeStyle = selectedColor; // passing selectedColor as stroke style
     ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
+
     ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
     ctx.stroke(); // drawing/filling line with color
 
@@ -75,12 +84,12 @@ const drawing = (e) => {
     if (selectedTool === "brush" || selectedTool === "eraser") {
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-        // if selected tool is eraser then set strokeStyle to white 
+        // if selected tool is eraser then set strokeStyle to white
         // to paint white color on to the existing canvas content else set the stroke color to selected color
         ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
         ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
         ctx.stroke(); // drawing/filling line with color
-    } 
+    }
     // else if (selectedTool === "rectangle") {
     //     drawRect(e);
     // } else if (selectedTool === "circle") {
@@ -99,7 +108,7 @@ toolBtns.forEach(btn => {
 });
 sizeSlider.addEventListener("change", () => { // passing slider value as brushSize
     brushWidth = sizeSlider.value;
-}); 
+});
 // brush size cursor display change
 document.onmousemove = function(e){
     var circle = document.getElementById("circle");
