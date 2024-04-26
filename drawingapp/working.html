@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combined 3D Scene and Canvas Drawing</title>
+    <!-- Include Three.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Include OrbitControls.js for camera control -->
+    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <!-- Include dat.GUI for GUI controls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+</head>
+<body>
+    <!-- Canvas for 3D Scene -->
+    <div id="threejs-container"></div>
+
+    <!-- Canvas for Drawing Tool -->
+    <canvas id="drawing-canvas" width="400" height="400" style="border: 1px solid black;"></canvas>
+
+    <script>
+        // Three.js variables
+        let scene, camera, renderer, controls, cube;
+
+        // Canvas drawing variables
+        let canvas, ctx, isDrawing = false;
+
+        initThreejs();
+        initCanvas();
+
+        function initThreejs() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('threejs-container').appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            camera.position.z = 5;
+
+            animate();
+        }
+
+        function initCanvas() {
+            canvas = document.getElementById('drawing-canvas');
+            ctx = canvas.getContext('2d');
+
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', endDrawing);
+        }
+
+        function startDrawing(event) {
+            isDrawing = true;
+            draw(event); // Start drawing immediately at the current mouse position
+        }
+
+        function draw(event) {
+            if (!isDrawing) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            // Update the color of the cube based on the drawing position
+            const color = ctx.getImageData(x, y, 1, 1).data;
+            cube.material.color.setRGB(color[0] / 255, color[1] / 255, color[2] / 255);
+
+            // Draw on the canvas
+            ctx.fillStyle = 'black';
+            ctx.fillRect(x, y, 5, 5); // Draw a small square
+        }
+
+        function endDrawing() {
+            isDrawing = false;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>
