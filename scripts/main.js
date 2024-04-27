@@ -9,7 +9,7 @@ import {threejsbrush} from './brush.js';
 //initializing the window and some important variables
 const scene = new THREE.Scene();
 
-const container = document.body;
+const container = document.getElementById("viewer");
 
 const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
 camera.position.z = 10;
@@ -17,7 +17,7 @@ camera.position.z = 10;
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( container.clientWidth, container.clientHeight);
 
-document.body.appendChild(renderer.domElement);
+container.appendChild(renderer.domElement);
 
 const controls = new OrbitControls( camera, renderer.domElement );
 
