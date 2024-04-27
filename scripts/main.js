@@ -23,7 +23,11 @@ const controls = new OrbitControls( camera, renderer.domElement );
 const gui = new GUI();
 
 let meshes = [];
-let material;
+//initiailizing materials first so the canvas can read off of it
+let material = new THREE.MeshPhongMaterial( {
+    side: THREE.DoubleSide,
+    flatShading: true,
+} );
 let mesh;
 let textures = [];
 let lights = [];
@@ -188,12 +192,12 @@ function animate() {
 
     //wait for everything to finish loading 
     //before we initialize a brush and assign textures
-    if ( meshesready && texturesready) {
+    if ( meshesready) {
         console.log(meshesready, texturesready)
-        assignTextures();
+        // assignTextures();
         //so threejsbrush doesn't get reinitiailized
         meshesready = false;
-        texturesready = false;
+        // texturesready = false;
     }
     controls.update();
     renderer.render(scene,camera);
@@ -205,7 +209,7 @@ function addLights() {
     directionalLightTop.position.set(0, 1, 0); 
     const directionalLightBottom = new THREE.DirectionalLight(0xffffff, 0.5);
     directionalLightBottom.position.set(-1, -1, 0); 
-    const hemlight = new THREE.HemisphereLight( 0xffffbb, 0x888888, 1 );
+    const hemlight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 );
     scene.add( hemlight );
     scene.add(directionalLightTop);
     scene.add(directionalLightBottom);
@@ -218,37 +222,33 @@ function addMeshes() {
     //rendering a simple cube for now (CHANGE TO A 3D MESH)
 
     //lets just do a cube to debug for now
-    material = new THREE.MeshPhongMaterial({color:0xffffff});
-	mesh = new THREE.Mesh( new THREE.BoxGeometry( 5,5,5 ), material );
-    console.log(mesh)
-    scene.add(mesh);
-    meshes.push(mesh); 
-    // const loader = new GLTFLoader();
-    // //loading the cow
-    // loader.load(
-    //     '../models/cow_unwrapped.glb',
-    //     function (gltf) {
-    //         const modelGeometry = gltf.scene.children[0].geometry;
-    //         var loader = new THREE.TextureLoader();
-    //         const material = new THREE.MeshPhongMaterial( {
-    //             side: THREE.DoubleSide,
-    //             flatShading: true,
-
-    //         } );
-    //         const modelMesh = new THREE.Mesh(modelGeometry,  material);
-    //         modelMesh.scale.set(5, 5, 5);
-    //         scene.add(modelMesh);
-    //         meshes.push(modelMesh); 
-    //     },
-    //     // if 100% means loaded
-    //     function (xhr) {
-    //         console.log("Mesh loaded successfully");
-    //         meshesready = true;
-    //     },
-    //     // an error callback
-    //     function (error) {
-    //         console.error('An error happened', error);
-    //     });
+    //material = new THREE.MeshPhongMaterial({color:0xffffff});
+	// mesh = new THREE.Mesh( new THREE.BoxGeometry( 5,5,5 ), material );
+    // console.log(mesh)
+    // scene.add(mesh);
+    // meshes.push(mesh); 
+    const loader = new GLTFLoader();
+    //loading the cow
+    loader.load(
+        '../models/cow_unwrapped.glb',
+        function (gltf) {
+            const modelGeometry = gltf.scene.children[0].geometry;
+            var loader = new THREE.TextureLoader();
+            
+            const modelMesh = new THREE.Mesh(modelGeometry,  material);
+            modelMesh.scale.set(5, 5, 5);
+            scene.add(modelMesh);
+            meshes.push(modelMesh); 
+        },
+        // if 100% means loaded
+        function (xhr) {
+            console.log("Mesh loaded successfully");
+            meshesready = true;
+        },
+        // an error callback
+        function (error) {
+            console.error('An error happened', error);
+        });
 
 }
 
