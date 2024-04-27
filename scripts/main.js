@@ -100,13 +100,15 @@ async function drawingapp() {
 
         // copying canvas data & passing as snapshot value.. this avoids dragging the image
         snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        console.log(canvas)
-        material.map.needsUpdate = true;
+     
     }
     const drawing = (e) => {
+       
         if (!isDrawing) return; // if isDrawing is false return from here
         ctx.putImageData(snapshot, 0, 0); // adding copied canvas data on to this canvas
         if (selectedTool === "brush" || selectedTool === "eraser") {
+            material.map =  new THREE.CanvasTexture(canvas);
+            console.log(material.map)
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
             // if selected tool is eraser then set strokeStyle to white
