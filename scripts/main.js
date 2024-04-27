@@ -4,7 +4,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GUI } from 'dat.gui'
 
 //importing local files
-import {threejsbrush} from './brush.js';
 
 //initializing the window and some important variables
 const scene = new THREE.Scene();
@@ -32,12 +31,10 @@ let lights = [];
 let meshesready = false;
 let texturesready = true;
 
-let Brush;
-
 
 //calls
-preload()
-drawingapp()
+preload();
+drawingapp();
 animate();
 
 async function drawingapp() {
@@ -177,7 +174,7 @@ async function preload() {
      //lights is a list of lights in the scene, and populates the lights list
     addLights();
     //creates the menubar
-    createdatgui();
+    //createdatgui();
     //meshes is a list of meshes in the scene, and populates the meshes list
     setTimeout(()=>"waiting to load", 1000);
 }
@@ -191,7 +188,6 @@ function animate() {
     if ( meshesready && texturesready) {
         console.log(meshesready, texturesready)
         assignTextures();
-        Brush = new threejsbrush(scene, camera, renderer, 1);
         //so threejsbrush doesn't get reinitiailized
         meshesready = false;
         texturesready = false;
@@ -253,6 +249,7 @@ function addMeshes() {
 
 }
 
+//not used
 function addTextures() {
     // load a texture, set wrap mode to repeat
     //seems like the onload callback isn't being run
@@ -285,6 +282,7 @@ function addTextures() {
    
     textures.push(texture)
 }
+//not used
 function createdatgui() {
      //GUI controls dat.gui
     for (var mesh of meshes)  {
@@ -305,7 +303,6 @@ function createdatgui() {
         color.r = value[0]/255;
         color.g = value[1]/255;
         color.b = value[2]/255;
-        Brush.setBrushColor(color);
     })
 }
 function assignTextures() {
