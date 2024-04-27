@@ -6,7 +6,8 @@
     <title>Drawing App JavaScript | CS184</title>
     <link rel="stylesheet" href="style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="script.js" defer></script>
+    <script src="drawing_board.js" defer></script>
+    <script type="module" src="scripts/model_renderer.js"></script>
 </head>
 <body>
     <div id="circle" ></div>
@@ -65,6 +66,9 @@
                 <button class="clear-canvas">Clear Canvas</button>
                 <button class="save-img">Save As Image</button>
             </div>
+        </section>
+        <section class="image-board">
+            <canvas></canvas>
         </section>
         <section class="drawing-board">
             <canvas></canvas>
