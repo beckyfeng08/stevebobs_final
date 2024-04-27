@@ -24,6 +24,8 @@ const controls = new OrbitControls( camera, renderer.domElement );
 const gui = new GUI();
 
 let meshes = [];
+let material;
+let mesh;
 let textures = [];
 let lights = [];
 
@@ -34,7 +36,9 @@ let Brush;
 
 
 //calls
-preload().then(drawingapp).then(animate);
+preload()
+drawingapp()
+animate();
 
 async function drawingapp() {
     
@@ -47,7 +51,10 @@ async function drawingapp() {
         clearCanvas = document.querySelector(".clear-canvas"),
         saveImg = document.querySelector(".save-img");
         const ctx = canvas.getContext("2d");
-        console.log(ctx)
+    console.log(canvas.width, canvas.height)
+    ctx.fillStyle = '#FFFFFF';
+	ctx.fillRect( 0, 0, 128, 128 );
+    material.map = new THREE.CanvasTexture(canvas);
     // global variables with default value
     
     let prevMouseX, prevMouseY, snapshot,
@@ -76,7 +83,6 @@ async function drawingapp() {
         // setCanvasBackground();
     });
   
-
     const startDraw = (e) => {
         isDrawing = true;
         prevMouseX = e.offsetX; // passing current mouseX position as prevMouseX value
@@ -97,7 +103,7 @@ async function drawingapp() {
 
         // copying canvas data & passing as snapshot value.. this avoids dragging the image
         snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
+        console.log(snapshot)
     }
     const drawing = (e) => {
         if (!isDrawing) return; // if isDrawing is false return from here
@@ -161,13 +167,12 @@ async function drawingapp() {
     canvas.addEventListener("mouseup", () => {
         isDrawing = false;
     });
-
 }
 
 //main functions
 async function preload() {
     //textures is a list of textures available to use, and populates the textures list
-    addTextures();
+    //addTextures();
     addMeshes();
      //lights is a list of lights in the scene, and populates the lights list
     addLights();
@@ -214,9 +219,9 @@ function addMeshes() {
     //rendering a simple cube for now (CHANGE TO A 3D MESH)
 
     //lets just do a cube to debug for now
-    var material = new THREE.MeshBasicMaterial();
-
-	var mesh = new THREE.Mesh( new THREE.BoxGeometry( 5,5,5 ), material );
+    material = new THREE.MeshPhongMaterial({color:0xffffff});
+	mesh = new THREE.Mesh( new THREE.BoxGeometry( 5,5,5 ), material );
+    console.log(mesh)
     scene.add(mesh);
     meshes.push(mesh); 
     // const loader = new GLTFLoader();
