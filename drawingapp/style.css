@@ -43,12 +43,13 @@ section {
 }
 
 .tools-board {
-    width: 210px;
+    width: 180px;
+    height: 450px;
     padding: 15px 22px 0;
 }
 
     .tools-board .row {
-        margin-bottom: 5px;
+        margin-bottom: 50px;
     }
 
 .row .options {
@@ -168,6 +169,7 @@ section {
     color: #6C757D;
     border: 1px solid #6C757D;
     transition: all 0.3s ease;
+    margin-top: 50px;
 }
 
 .clear-canvas:hover {

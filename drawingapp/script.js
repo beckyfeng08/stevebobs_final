@@ -99,9 +99,8 @@ toolBtns.forEach(btn => {
 });
 sizeSlider.addEventListener("change", () => { // passing slider value as brushSize
     brushWidth = sizeSlider.value;
-}); 
-// brush size cursor display change
-document.onmousemove = function(e){
+});
+document.onmousemove = function(e){ // brush size cursor display change
     var circle = document.getElementById("circle");
     circle.style.top = e.clientY+"px";
     circle.style.left = e.clientX+"px";
