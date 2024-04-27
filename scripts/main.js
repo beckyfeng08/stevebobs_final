@@ -20,44 +20,46 @@ container.appendChild(renderer.domElement);
 
 const controls = new OrbitControls( camera, renderer.domElement );
 
-const gui = new GUI();
+//const gui = new GUI();
 
-let meshes = [];
 //initiailizing materials first so the canvas can read off of it
 let material = new THREE.MeshPhongMaterial( {
     side: THREE.DoubleSide,
     flatShading: true,
 } );
 let mesh;
-let textures = [];
 let lights = [];
 
-let meshesready = false;
-let texturesready = true;
+//drawing app init items
+const canvas = document.getElementById("drawingapp"),
+toolBtns = document.querySelectorAll(".tool"),
+fillColor = document.querySelector("#fill-color"),
+sizeSlider = document.querySelector("#size-slider"),
+colorBtns = document.querySelectorAll(".colors .option"),
+colorPicker = document.querySelector("#color-picker"),
+clearCanvas = document.querySelector(".clear-canvas"),
+saveImg = document.querySelector(".save-img"),
+ctx = canvas.getContext("2d");
+ctx.fillStyle = '#FFFFFF';
+ctx.fillRect( 0, 0, 300, 150 );
+material.map = new THREE.CanvasTexture(canvas);
+// global variables with default value
 
 
 //calls
 preload();
 drawingapp();
+drawOnMesh();
 animate();
 
+//Drawing app for the mesh
+async function drawOnMesh() {
+   
+
+}
+
+//Drawing app for the canvas
 async function drawingapp() {
-    
-    const canvas = document.getElementById("drawingapp"),
-        toolBtns = document.querySelectorAll(".tool"),
-        fillColor = document.querySelector("#fill-color"),
-        sizeSlider = document.querySelector("#size-slider"),
-        colorBtns = document.querySelectorAll(".colors .option"),
-        colorPicker = document.querySelector("#color-picker"),
-        clearCanvas = document.querySelector(".clear-canvas"),
-        saveImg = document.querySelector(".save-img");
-        const ctx = canvas.getContext("2d");
-    console.log(canvas.width, canvas.height)
-    ctx.fillStyle = '#FFFFFF';
-	ctx.fillRect( 0, 0, 300, 150 );
-    material.map = new THREE.CanvasTexture(canvas);
-    // global variables with default value
-    
     let prevMouseX, prevMouseY, snapshot,
         isDrawing = false,
         selectedTool = "brush",
@@ -107,12 +109,10 @@ async function drawingapp() {
      
     }
     const drawing = (e) => {
-       
         if (!isDrawing) return; // if isDrawing is false return from here
         ctx.putImageData(snapshot, 0, 0); // adding copied canvas data on to this canvas
         if (selectedTool === "brush" || selectedTool === "eraser") {
             material.map =  new THREE.CanvasTexture(canvas);
-            console.log(material.map)
             ctx.lineCap = "round";
             ctx.lineJoin = "round";
             // if selected tool is eraser then set strokeStyle to white
@@ -121,7 +121,6 @@ async function drawingapp() {
             ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
             ctx.stroke(); // drawing/filling line with color
         }
-   
     }
     toolBtns.forEach(btn => {
         btn.addEventListener("click", () => { // adding click event to all tool option
@@ -185,23 +184,11 @@ async function preload() {
     //meshes is a list of meshes in the scene, and populates the meshes list
     setTimeout(()=>"waiting to load", 1000);
 }
- 
 //helper functions
 function animate() {
     requestAnimationFrame(animate);
-
-    //wait for everything to finish loading 
-    //before we initialize a brush and assign textures
-    if ( meshesready) {
-        console.log(meshesready, texturesready)
-        // assignTextures();
-        //so threejsbrush doesn't get reinitiailized
-        meshesready = false;
-        // texturesready = false;
-    }
     controls.update();
     renderer.render(scene,camera);
-
 }
 function addLights() {
     // Adding lighting
@@ -235,15 +222,14 @@ function addMeshes() {
             const modelGeometry = gltf.scene.children[0].geometry;
             var loader = new THREE.TextureLoader();
             
-            const modelMesh = new THREE.Mesh(modelGeometry,  material);
-            modelMesh.scale.set(5, 5, 5);
-            scene.add(modelMesh);
-            meshes.push(modelMesh); 
+            mesh = new THREE.Mesh(modelGeometry,  material);
+            mesh.scale.set(5, 5, 5);
+            scene.add(mesh);
         },
         // if 100% means loaded
         function (xhr) {
             console.log("Mesh loaded successfully");
-            meshesready = true;
+   
         },
         // an error callback
         function (error) {
@@ -252,70 +238,70 @@ function addMeshes() {
 
 }
 
-//not used
-function addTextures() {
-    // load a texture, set wrap mode to repeat
-    //seems like the onload callback isn't being run
-    var loader = new THREE.TextureLoader();
-    loader.crossOrigin = "";
-    const texture = loader.load(
-        "https://i.imgur.com/eCpD7bM.jpg",
-         // onLoad callback
-       function(texture) {
-           // Texture loaded successfully
-           console.log("Texture loaded successfully");
-           // Here you can assign the texture to a material or perform other operations
-           texture.needsUpdate = true;
-           texturesready = true;
+// //not used
+// function addTextures() {
+//     // load a texture, set wrap mode to repeat
+//     //seems like the onload callback isn't being run
+//     var loader = new THREE.TextureLoader();
+//     loader.crossOrigin = "";
+//     const texture = loader.load(
+//         "https://i.imgur.com/eCpD7bM.jpg",
+//          // onLoad callback
+//        function(texture) {
+//            // Texture loaded successfully
+//            console.log("Texture loaded successfully");
+//            // Here you can assign the texture to a material or perform other operations
+//            texture.needsUpdate = true;
+//            texturesready = true;
 
-        }, 
+//         }, 
         
-       // onError callback
-       function(error) {
-           // Error occurred while loading texture
-           console.log("Error loading texture:", error);
-       }
-    )  
-    texture.encoding = THREE.sRGBEncoding;  
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    //texture.needsUpdate = true;
-    texture.repeat.set( 4, 4 );
-    //debug the texture with a cube
+//        // onError callback
+//        function(error) {
+//            // Error occurred while loading texture
+//            console.log("Error loading texture:", error);
+//        }
+//     )  
+//     texture.encoding = THREE.sRGBEncoding;  
+//     texture.wrapS = THREE.RepeatWrapping;
+//     texture.wrapT = THREE.RepeatWrapping;
+//     //texture.needsUpdate = true;
+//     texture.repeat.set( 4, 4 );
+//     //debug the texture with a cube
    
-    textures.push(texture)
-}
-//not used
-function createdatgui() {
-     //GUI controls dat.gui
-    for (var mesh of meshes)  {
-        gui.add(mesh.material, "wireframe");
-    }
+//     textures.push(texture)
+// }
+// //not used
+// function createdatgui() {
+//      //GUI controls dat.gui
+//     for (var mesh of meshes)  {
+//         gui.add(mesh.material, "wireframe");
+//     }
         
-    //color picker
-    let color = {
-        r: 0,
-        g: 0,
-        b: 0
-    };
-    let palette = {
-        color: [0,255,255]
-    }
-    let folderRGB = gui.addFolder("RGB");
-    folderRGB.addColor(palette, 'color').onChange(function(value) {
-        color.r = value[0]/255;
-        color.g = value[1]/255;
-        color.b = value[2]/255;
-    })
-}
-function assignTextures() {
-    //console.log("poo")
-    for (var i = 0; i < meshes.length; i++ ) {
-        meshes[i].material.map =  textures[i]
-        //console.log("hi")
-        meshes[i].material.map.needsUpdate = true;
-    }
-}
+//     //color picker
+//     let color = {
+//         r: 0,
+//         g: 0,
+//         b: 0
+//     };
+//     let palette = {
+//         color: [0,255,255]
+//     }
+//     let folderRGB = gui.addFolder("RGB");
+//     folderRGB.addColor(palette, 'color').onChange(function(value) {
+//         color.r = value[0]/255;
+//         color.g = value[1]/255;
+//         color.b = value[2]/255;
+//     })
+// }
+// function assignTextures() {
+//     //console.log("poo")
+//     for (var i = 0; i < meshes.length; i++ ) {
+//         meshes[i].material.map =  textures[i]
+//         //console.log("hi")
+//         meshes[i].material.map.needsUpdate = true;
+//     }
+// }
 
 //event listeners
 window.addEventListener("resize", function() {

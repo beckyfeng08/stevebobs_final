@@ -137,7 +137,6 @@
 			}
 
 			function draw( drawContext, x, y ) {
-
 				drawContext.moveTo( drawStartPos.x, drawStartPos.y );
 				drawContext.strokeStyle = '#000000';
 				drawContext.lineTo( x, y );
@@ -146,7 +145,6 @@
 				drawStartPos.set( x, y );
 				// need to flag the map as needing updating.
 				material.map.needsUpdate = true;
-
 			}
 
 			function onWindowResize() {
