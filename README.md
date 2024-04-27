@@ -5,7 +5,7 @@
 - WebGL tutorial (documentation): https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial
 - Drawing app with vanilla javascript, html, css: https://www.youtube.com/watch?v=y84tBZo8GFo
 - Drawing app using React.JS: https://www.youtube.com/playlist?list=PLSxgVLtIB0IFmQGuVMSE_wDHPW5rq4Ik7
-
+- Drawing UVs onto a screen: https://discourse.threejs.org/t/solved-2d-uv-display-from-a-model/3652/2
 
 ## Goals
 - Finish watching and following video tutorials by Wednesday April 24
