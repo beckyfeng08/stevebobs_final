@@ -54,8 +54,28 @@
 
 				material = new THREE.MeshBasicMaterial();
 
-				mesh = new THREE.Mesh( new THREE.BoxGeometry( 200, 200, 200 ), material );
-				scene.add( mesh );
+				 mesh = new THREE.Mesh( new THREE.BoxGeometry( 200, 200, 200 ), material );
+				//const loader = new GLTFLoader();
+			//loading the cow
+			// loader.load(
+			// 	'/models/cow_unwrapped.glb',
+			// 	function (gltf) {
+			// 		const modelGeometry = gltf.scene.children[0].geometry;
+			// 		const modelMesh = new THREE.Mesh(modelGeometry,  material);
+			// 		modelMesh.scale.set(5, 5, 5);
+			// 		scene.add(modelMesh);
+			// 	},
+			// 	// if 100% means loaded
+			// 	function (xhr) {
+			// 		console.log("Mesh loaded successfully");
+
+			// 	},
+			// 	// an error callback
+			// 	function (error) {
+			// 		console.error('An error happened', error);
+			// 	});
+				
+				 scene.add( mesh );
 
 				renderer = new THREE.WebGLRenderer( { antialias: true } );
 				renderer.setPixelRatio( window.devicePixelRatio );
