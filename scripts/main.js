@@ -50,7 +50,7 @@ async function drawingapp() {
         const ctx = canvas.getContext("2d");
     console.log(canvas.width, canvas.height)
     ctx.fillStyle = '#FFFFFF';
-	ctx.fillRect( 0, 0, 128, 128 );
+	ctx.fillRect( 0, 0, 300, 150 );
     material.map = new THREE.CanvasTexture(canvas);
     // global variables with default value
     
@@ -100,7 +100,8 @@ async function drawingapp() {
 
         // copying canvas data & passing as snapshot value.. this avoids dragging the image
         snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        console.log(snapshot)
+        console.log(canvas)
+        material.map.needsUpdate = true;
     }
     const drawing = (e) => {
         if (!isDrawing) return; // if isDrawing is false return from here
