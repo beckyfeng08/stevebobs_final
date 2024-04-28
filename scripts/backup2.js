@@ -16,11 +16,11 @@ const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container
 camera.position.z = 15;
 
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setSize( container.clientWidth, container.clientHeight);
 
 container.appendChild(renderer.domElement);
 
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls( camera, renderer.domElement );
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -28,34 +28,34 @@ const pointer = new THREE.Vector2();
 
 //initiailizing materials first so the canvas can read off of it
 let filepath = '../models/animeface.gltf'; //for addMeshes
-let material = new THREE.MeshPhongMaterial({
+let material = new THREE.MeshPhongMaterial( {
     side: THREE.DoubleSide,
 
-}); //for canvas initialization
+} ); //for canvas initialization
 let mesh;
 let currmeshindex = 0;
-let meshes = ["/models/cow_unwrapped.gltf", "/models/animeface.gltf", "/models/bunny.gltf"]
+let meshes = ["/models/cow_unwrapped.gltf", "/models/animeface.gltf",  "/models/bunny.gltf"]
 let lights = [];
 let showUV = true;
 
 
 //drawing app init items
 const canvas = document.getElementById("drawingapp"),
-    uvmesh = document.getElementById("uv-layer"),
-    toolBtns = document.querySelectorAll(".tool"),
-    fillColor = document.querySelector("#fill-color"),
-    opacitySlider = document.querySelector("#opacity-slider"),
-    sizeSlider = document.querySelector("#size-slider"),
-    colorBtns = document.querySelectorAll(".colors .option"),
-    uvBtn = document.getElementById("uv-button"),
-    colorPicker = document.querySelector("#color-picker"),
-    generateMesh = document.querySelector(".generate-mesh"),
-    clearCanvas = document.querySelector(".clear-canvas"),
-    saveImg = document.querySelector(".save-img"),
-    importImg = document.querySelector(".import-img"),
-    importMesh = document.querySelector(".import-glb"),
-    ctx = canvas.getContext("2d"),
-    ctx_uv = uvmesh.getContext("2d");
+uvmesh = document.getElementById("uv-layer"),
+toolBtns = document.querySelectorAll(".tool"),
+fillColor = document.querySelector("#fill-color"),
+opacitySlider = document.querySelector("#opacity-slider"),
+sizeSlider = document.querySelector("#size-slider"),
+colorBtns = document.querySelectorAll(".colors .option"),
+uvBtn = document.getElementById("uv-button"),
+colorPicker = document.querySelector("#color-picker"),
+generateMesh =  document.querySelector(".generate-mesh"),
+clearCanvas = document.querySelector(".clear-canvas"),
+saveImg = document.querySelector(".save-img"),
+importImg =  document.querySelector(".import-img"),
+importMesh =  document.querySelector(".import-glb"),
+ctx = canvas.getContext("2d"),
+ctx_uv = uvmesh.getContext("2d");
 material.map = new THREE.CanvasTexture(canvas);
 
 //calls
@@ -100,10 +100,9 @@ async function drawingapp() {
         selectedColor = "#000";
     const setCanvasBackground = () => {
         // setting whole canvas background to white, so the downloaded img background will be white
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = selectedColor;
-        ctx_uv.clearRect(0, 0, uvmesh.width, uvmesh.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx_uv.fillStyle = "#fff";
+        ctx_uv.fillRect(0, 0, uvmesh.width, uvmesh.height);
     }
     window.addEventListener("load", () => {
         // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
@@ -137,16 +136,16 @@ async function drawingapp() {
         snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
         //setting lastbrushx and lastbrushy
-        raycaster.setFromCamera(pointer, camera);
+        raycaster.setFromCamera( pointer, camera );
         //cast a ray and find uv coordinates to draw onto
         const intersects = raycaster.intersectObjects(scene.children);
         if (intersects.length > 0) {
-            controls.enabled = false;
-            //the raycaster found a face to paint on
-            const intersection = intersects[0];
-            //calculating brsuh positions from uv coordinates
-            lastBrushX = intersection.uv.x * canvas.width;
-            lastBrushY = (1 - intersection.uv.y) * canvas.height; //top left corner is 0
+             controls.enabled = false;
+             //the raycaster found a face to paint on
+             const intersection = intersects[0];
+             //calculating brsuh positions from uv coordinates
+            lastBrushX = intersection.uv.x*canvas.width;
+            lastBrushY = (1 - intersection.uv.y)*canvas.height; //top left corner is 0
         }
 
     }
@@ -158,19 +157,19 @@ async function drawingapp() {
             if (drawingOnCanvas) {
                 ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
                 ctx.stroke(); // drawing/filling line with color
-                material.map = new THREE.CanvasTexture(canvas);
-            } else if (drawingOnMesh) {
-                raycaster.setFromCamera(pointer, camera);
-                //cast a ray and find uv coordinates to draw onto
-                const intersects = raycaster.intersectObjects(scene.children);
-                if (intersects.length > 0) {
+                material.map =  new THREE.CanvasTexture(canvas);
+            }  else if (drawingOnMesh) {
+                raycaster.setFromCamera( pointer, camera );
+               //cast a ray and find uv coordinates to draw onto
+               const intersects = raycaster.intersectObjects(scene.children);
+               if (intersects.length > 0) {
                     controls.enabled = false;
                     //the raycaster found a face to paint on
                     const intersection = intersects[0];
                     //calculating brsuh positions from uv coordinates
 
-                    var brushX = intersection.uv.x * canvas.width;
-                    var brushY = (1 - intersection.uv.y) * canvas.height; //top left corner is 0
+                    var brushX = intersection.uv.x*canvas.width;
+                    var brushY = (1 - intersection.uv.y)*canvas.height; //top left corner is 0
 
                     if ((Math.abs(brushX - lastBrushX) < 30) && (Math.abs(brushY - lastBrushY) < 30)) {
 
@@ -185,8 +184,8 @@ async function drawingapp() {
                     lastBrushX = brushX;
                     lastBrushY = brushY;
 
-                    material.map = new THREE.CanvasTexture(canvas);
-                }
+                    material.map =  new THREE.CanvasTexture(canvas);
+               }
             }
         }
 
@@ -204,15 +203,15 @@ async function drawingapp() {
     });
 
     opacitySlider.addEventListener("change", () => { // passing slider value as opacity
-        opacity = opacitySlider.value / 100.0;
+        opacity = opacitySlider.value/100.0;
     });
     // brush size cursor display change
-    document.onmousemove = function (e) {
+    document.onmousemove = function(e){
         var circle = document.getElementById("circle");
-        circle.style.top = e.clientY + "px";
-        circle.style.left = e.clientX + "px";
-        circle.style.width = brushWidth + "px";
-        circle.style.height = brushWidth + "px";
+        circle.style.top = e.clientY+"px";
+        circle.style.left = e.clientX+"px";
+        circle.style.width = brushWidth+"px";
+        circle.style.height = brushWidth+"px";
     }
     colorBtns.forEach(btn => {
         btn.addEventListener("click", () => { // adding click event to all color button
@@ -237,8 +236,8 @@ async function drawingapp() {
         }
     });
     clearCanvas.addEventListener("click", () => {
-        ctx.fillRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
-        material.map = new THREE.CanvasTexture(canvas);
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
+        material.map =new THREE.CanvasTexture(canvas);
         setCanvasBackground();
     });
     saveImg.addEventListener("click", () => {
@@ -252,13 +251,13 @@ async function drawingapp() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
-        input.onchange = function (event) {
+        input.onchange = function(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function (event) {
+            reader.onload = function(event) {
                 const img = new Image();
-                img.onload = function () {
+                img.onload = function() {
                     ctx.clearRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
                     setCanvasBackground();
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -286,7 +285,7 @@ async function drawingapp() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.glb, .gltf'; // Accept GLTF and GLB files
-        input.onchange = async function (event) {
+        input.onchange = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
             const url = URL.createObjectURL(file);
@@ -321,9 +320,9 @@ async function drawingapp() {
 
     //event listeners for the 3d viewer
     renderer.domElement.addEventListener('mousedown', (event) => {
-        raycaster.setFromCamera(pointer, camera);
-        raycaster.intersectObjects(scene.children)
-        if (raycaster.intersectObjects(scene.children).length > 0) {
+        raycaster.setFromCamera( pointer, camera );
+        raycaster.intersectObjects( scene.children )
+        if (raycaster.intersectObjects( scene.children ).length > 0) {
             drawingOnMesh = true;
         }
         drawingOnCanvas = false;
@@ -341,14 +340,14 @@ async function drawingapp() {
         isDrawing = false;
     });
 
-    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener( 'pointermove', onPointerMove );
 
-    function onPointerMove(event) {
+    function onPointerMove( event ) {
 
         // calculate pointer position in normalized device coordinates
         // (-1 to +1) for both components
-        pointer.x = ((event.pageX - container.offsetLeft) / container.offsetWidth) * 2 - 1;
-        pointer.y = - ((event.pageY - container.offsetTop) / container.offsetHeight) * 2 + 1;
+        pointer.x = (( event.pageX - container.offsetLeft ) / container.offsetWidth )* 2 - 1;
+        pointer.y = - (( event.pageY - container.offsetTop ) / container.offsetHeight )* 2 + 1;
 
 
     }
@@ -364,7 +363,7 @@ async function preload() {
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
-    renderer.render(scene, camera);
+    renderer.render(scene,camera);
 }
 async function addLights() {
     // Adding lighting
@@ -372,8 +371,8 @@ async function addLights() {
     directionalLightTop.position.set(0, 1, 0);
     const directionalLightBottom = new THREE.DirectionalLight(0xffffff, 0.3);
     directionalLightBottom.position.set(-1, -1, 0);
-    const hemlight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
-    scene.add(hemlight);
+    const hemlight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.7 );
+    scene.add( hemlight );
     scene.add(directionalLightTop);
     scene.add(directionalLightBottom);
     lights.push(hemlight);
@@ -395,10 +394,10 @@ async function loadMesh() {
         function (xhr) {
             console.log("Mesh loaded successfully");
 
-        }).then((gltf) => {
+        }).then( (gltf) => {
             const modelGeometry = gltf.scene.children[0].geometry;
 
-            mesh = new THREE.Mesh(modelGeometry, material);
+            mesh = new THREE.Mesh(modelGeometry,  material);
             mesh.scale.set(5, 5, 5);
             scene.add(mesh);
             console.log(mesh)
@@ -415,7 +414,7 @@ async function loadMesh() {
 
 
 //event listeners
-window.addEventListener("resize", function () {
+window.addEventListener("resize", function() {
     var width = container.clientWidth;
     var height = container.clientHeight;
     renderer.setSize(width, height);

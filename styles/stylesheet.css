@@ -22,6 +22,7 @@
     transform: translateX(-50%) translateY(-50%); /*not sure why Y is offset like this*/
     top: 50%;
     left: -100%;
+    z-index: 3;
     pointer-events: none;
 }
 
@@ -212,7 +213,7 @@ section {
 }
 .buttons .save-img:hover {
     background: #9e88c8;
-    
+
     border: 1px solid #8D6EC7;
 }
 .buttons .generate-mesh {
@@ -222,7 +223,7 @@ section {
 }
 .buttons  .generate-mesh:hover {
     background: #745e9c;
-    
+
     border: 1px solid #8D6EC7;
 }
 .drawing-board {
@@ -239,12 +240,12 @@ section {
 }
 
 #uv-layer {
-    z-index: 1;
-    background: white;
+    z-index: 2;
+    pointer-events: none;
 }
 
 #drawingapp {
-    z-index: 2;
+    z-index: 1;
 }
 
     .drawing-board :hover {
