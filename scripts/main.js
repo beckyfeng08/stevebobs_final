@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GUI } from 'dat.gui'
 import * as jquery from "https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js";
+import { shininess } from 'three/examples/jsm/nodes/Nodes.js';
 
 //importing local files
 
@@ -11,8 +12,8 @@ const scene = new THREE.Scene();
 
 const container = document.getElementById("viewer");
 
-const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
-camera.position.z = 10;
+const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+camera.position.z = 15;
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( container.clientWidth, container.clientHeight);
@@ -27,10 +28,12 @@ const pointer = new THREE.Vector2();
 
 //initiailizing materials first so the canvas can read off of it
 
-let filepath = '../models/cow_unwrapped.gltf'; //for addMeshes
+let filepath = '../models/animeface.gltf'; //for addMeshes
 let material = new THREE.MeshPhongMaterial( {
     side: THREE.DoubleSide,
-    flatShading: true,
+ 
+
+    
 } ); //for canvas initialization
 let mesh;
 let lights = [];
@@ -83,12 +86,7 @@ async function drawingapp() {
         setCanvasBackground();
     });
 
-    window.addEventListener("resize", () => {
-        // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-        // setCanvasBackground();
-    });
+  
     let lastBrushX;
     let lastBrushY;
   
@@ -225,11 +223,11 @@ async function drawingapp() {
     });
     importMesh.addEventListener("click", () => {
         // TODO: Import a mesh into the scene and replace it with the cow. 
-        //You may wanna read this for more context: 
+        // You may wanna read this for more context: 
         // https://threejs.org/docs/#manual/en/introduction/Loading-3D-models
         // https://threejs.org/docs/index.html#examples/en/loaders/GLTFLoader
-        // replace it with the cow by assigning the variable "mesh" to the newly imported mesh
-        // we may need to do this differently idk how any of this works
+        // This thread may help: https://stackoverflow.com/questions/67864724/threejs-load-gltf-model-directly-from-file-input
+        // creating urls: https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL_static
         //Useful variables to keep track of:
         // filepath - filepath of the imported mesh local to this repo
         // addMeshes(file_path) - takes a string of a filepath as an argument to load and 
@@ -310,9 +308,9 @@ function addLights() {
     // Adding lighting
     const directionalLightTop = new THREE.DirectionalLight(0xffffff, 1);
     directionalLightTop.position.set(0, 1, 0); 
-    const directionalLightBottom = new THREE.DirectionalLight(0xffffff, 0.5);
+    const directionalLightBottom = new THREE.DirectionalLight(0xffffff, 0.3);
     directionalLightBottom.position.set(-1, -1, 0); 
-    const hemlight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 );
+    const hemlight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.7 );
     scene.add( hemlight );
     scene.add(directionalLightTop);
     scene.add(directionalLightBottom);
