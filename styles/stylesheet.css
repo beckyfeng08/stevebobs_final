@@ -194,3 +194,7 @@ section {
         width: 500px;
         height: 500px;
     }
+
+    .drawing-board :hover {
+        cursor: none;
+}

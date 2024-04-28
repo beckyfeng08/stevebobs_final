@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { GUI } from 'dat.gui'
+import * as jquery from "https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js";
 
 //importing local files
 
@@ -20,6 +21,8 @@ container.appendChild(renderer.domElement);
 
 const controls = new OrbitControls( camera, renderer.domElement );
 
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
 //const gui = new GUI();
 
 //initiailizing materials first so the canvas can read off of it
@@ -29,6 +32,7 @@ let material = new THREE.MeshPhongMaterial( {
 } );
 let mesh;
 let lights = [];
+
 
 //drawing app init items
 const canvas = document.getElementById("drawingapp"),
@@ -40,8 +44,6 @@ colorPicker = document.querySelector("#color-picker"),
 clearCanvas = document.querySelector(".clear-canvas"),
 saveImg = document.querySelector(".save-img"),
 ctx = canvas.getContext("2d");
-ctx.fillStyle = '#FFFFFF';
-ctx.fillRect( 0, 0, 300, 150 );
 material.map = new THREE.CanvasTexture(canvas);
 // global variables with default value
 
@@ -49,17 +51,13 @@ material.map = new THREE.CanvasTexture(canvas);
 //calls
 preload();
 drawingapp();
-drawOnMesh();
 animate();
 
-//Drawing app for the mesh
-async function drawOnMesh() {
-   
-
-}
 
 //Drawing app for the canvas
 async function drawingapp() {
+    let drawingOnMesh = false;
+    let drawingOnCanvas = false;
     let prevMouseX, prevMouseY, snapshot,
         isDrawing = false,
         selectedTool = "brush",
@@ -72,7 +70,6 @@ async function drawingapp() {
         ctx.fillStyle = selectedColor; // setting fillstyle back to the selectedColor, it'll be the brush color
     }
     window.addEventListener("load", () => {
-        
         // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
@@ -87,9 +84,11 @@ async function drawingapp() {
     });
   
     const startDraw = (e) => {
-        isDrawing = true;
+        
         prevMouseX = e.offsetX; // passing current mouseX position as prevMouseX value
         prevMouseY = e.offsetY; // passing current mouseY position as prevMouseY value
+        
+        isDrawing = true;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
         // ctx.arc(prevMouseX, prevMouseY, brushWidth/2.0, 0, 2*Math.PI); // for single click paint case
@@ -98,29 +97,42 @@ async function drawingapp() {
         ctx.beginPath(); // creating new path to draw
 
         ctx.lineWidth = brushWidth; // passing brushSize as line width
-        // ctx.strokeStyle = selectedColor; // passing selectedColor as stroke style
-        ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
-
-        ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
-        ctx.stroke(); // drawing/filling line with color
-
+        ctx.strokeStyle = selectedColor; // passing selectedColor as stroke style
         // copying canvas data & passing as snapshot value.. this avoids dragging the image
         snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
      
     }
     const drawing = (e) => {
+        
         if (!isDrawing) return; // if isDrawing is false return from here
         ctx.putImageData(snapshot, 0, 0); // adding copied canvas data on to this canvas
+        console.log(drawingOnMesh)
         if (selectedTool === "brush" || selectedTool === "eraser") {
-            material.map =  new THREE.CanvasTexture(canvas);
-            ctx.lineCap = "round";
-            ctx.lineJoin = "round";
-            // if selected tool is eraser then set strokeStyle to white
-            // to paint white color on to the existing canvas content else set the stroke color to selected color
-            ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
-            ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
-            ctx.stroke(); // drawing/filling line with color
-        }
+            if (drawingOnCanvas) {
+                ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
+                ctx.stroke(); // drawing/filling line with color
+                material.map =  new THREE.CanvasTexture(canvas);
+            }  else if (drawingOnMesh) {
+                
+                raycaster.setFromCamera( pointer, camera );
+               //cast a ray and find uv coordinates to draw onto
+               const intersects = raycaster.intersectObjects(scene.children);
+               console.log(intersects)
+               if (intersects.length > 0) {
+                    controls.enabled = false;
+                    //the raycaster found a face to paint on
+                    const intersection = intersects[0];
+                    //calculating brsuh positions from uv coordinates
+                    
+                    var brushX = intersection.uv.x*canvas.width;
+                    var brushY = (1 - intersection.uv.y)*canvas.height; //top left corner is 0
+                    ctx.lineTo(brushX, brushY); // creating line according to the mouse pointer
+                    ctx.stroke(); // drawing/filling line with color
+                    material.map =  new THREE.CanvasTexture(canvas);
+               }  
+            }
+        } 
+        
     }
     toolBtns.forEach(btn => {
         btn.addEventListener("click", () => { // adding click event to all tool option
@@ -165,11 +177,53 @@ async function drawingapp() {
         link.href = canvas.toDataURL(); // passing canvasData as link href value
         link.click(); // clicking link to download image
     });
-    canvas.addEventListener("mousedown", startDraw);
+    canvas.addEventListener("mousedown", (event) => {
+        drawingOnMesh = false;
+        drawingOnCanvas = true;
+        startDraw(event);
+
+    });
     canvas.addEventListener("mousemove", drawing);
     canvas.addEventListener("mouseup", () => {
+        controls.enabled = true;
+        drawingOnMesh = false;
+        drawingOnCanvas = false;
         isDrawing = false;
     });
+
+    //event listeners for the 3d viewer
+    renderer.domElement.addEventListener('mousedown', (event) => {
+        raycaster.setFromCamera( pointer, camera );
+        raycaster.intersectObjects( scene.children )
+        if (raycaster.intersectObjects( scene.children ).length > 0) {
+            drawingOnMesh = true;
+        }
+        drawingOnCanvas = false;
+        startDraw(event);
+        
+    
+    });
+    renderer.domElement.addEventListener('mousemove', () => {
+        drawing();
+    });
+    renderer.domElement.addEventListener('mouseup', () => {
+        controls.enabled = true;
+        drawingOnMesh = false;
+        drawingOnCanvas = false;
+        isDrawing = false;
+    });
+    
+    window.addEventListener( 'pointermove', onPointerMove );
+
+    function onPointerMove( event ) {
+
+        // calculate pointer position in normalized device coordinates
+        // (-1 to +1) for both components
+        pointer.x = (( event.pageX - container.offsetLeft ) / container.offsetWidth )* 2 - 1;
+        pointer.y = - (( event.pageY - container.offsetTop ) / container.offsetHeight )* 2 + 1;
+        
+    
+    }
 }
 
 //main functions
@@ -237,71 +291,6 @@ function addMeshes() {
         });
 
 }
-
-// //not used
-// function addTextures() {
-//     // load a texture, set wrap mode to repeat
-//     //seems like the onload callback isn't being run
-//     var loader = new THREE.TextureLoader();
-//     loader.crossOrigin = "";
-//     const texture = loader.load(
-//         "https://i.imgur.com/eCpD7bM.jpg",
-//          // onLoad callback
-//        function(texture) {
-//            // Texture loaded successfully
-//            console.log("Texture loaded successfully");
-//            // Here you can assign the texture to a material or perform other operations
-//            texture.needsUpdate = true;
-//            texturesready = true;
-
-//         }, 
-        
-//        // onError callback
-//        function(error) {
-//            // Error occurred while loading texture
-//            console.log("Error loading texture:", error);
-//        }
-//     )  
-//     texture.encoding = THREE.sRGBEncoding;  
-//     texture.wrapS = THREE.RepeatWrapping;
-//     texture.wrapT = THREE.RepeatWrapping;
-//     //texture.needsUpdate = true;
-//     texture.repeat.set( 4, 4 );
-//     //debug the texture with a cube
-   
-//     textures.push(texture)
-// }
-// //not used
-// function createdatgui() {
-//      //GUI controls dat.gui
-//     for (var mesh of meshes)  {
-//         gui.add(mesh.material, "wireframe");
-//     }
-        
-//     //color picker
-//     let color = {
-//         r: 0,
-//         g: 0,
-//         b: 0
-//     };
-//     let palette = {
-//         color: [0,255,255]
-//     }
-//     let folderRGB = gui.addFolder("RGB");
-//     folderRGB.addColor(palette, 'color').onChange(function(value) {
-//         color.r = value[0]/255;
-//         color.g = value[1]/255;
-//         color.b = value[2]/255;
-//     })
-// }
-// function assignTextures() {
-//     //console.log("poo")
-//     for (var i = 0; i < meshes.length; i++ ) {
-//         meshes[i].material.map =  textures[i]
-//         //console.log("hi")
-//         meshes[i].material.map.needsUpdate = true;
-//     }
-// }
 
 //event listeners
 window.addEventListener("resize", function() {
