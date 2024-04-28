@@ -15,11 +15,11 @@ const camera = new THREE.PerspectiveCamera(60, container.clientWidth / container
 camera.position.z = 10;
 
 const renderer = new THREE.WebGLRenderer();
-renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setSize( container.clientWidth, container.clientHeight);
 
 container.appendChild(renderer.domElement);
 
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls( camera, renderer.domElement );
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
@@ -27,77 +27,35 @@ const pointer = new THREE.Vector2();
 //const gui = new GUI();
 
 //initiailizing materials first so the canvas can read off of it
-let material = new THREE.MeshPhongMaterial({
+let material = new THREE.MeshPhongMaterial( {
     side: THREE.DoubleSide,
     flatShading: true,
-});
+} );
 let mesh;
 let lights = [];
 
 
 //drawing app init items
 const canvas = document.getElementById("drawingapp"),
-    toolBtns = document.querySelectorAll(".tool"),
-    fillColor = document.querySelector("#fill-color"),
-    opacitySlider = document.querySelector("#opacity-slider"),
-    sizeSlider = document.querySelector("#size-slider"),
-    colorBtns = document.querySelectorAll(".colors .option"),
-    colorPicker = document.querySelector("#color-picker"),
-    clearCanvas = document.querySelector(".clear-canvas"),
-    saveImg = document.querySelector(".save-img"),
-    importImg = document.querySelector(".import-img"),
-    importMesh = document.querySelector(".import-glb"),
-    ctx = canvas.getContext("2d");
+toolBtns = document.querySelectorAll(".tool"),
+fillColor = document.querySelector("#fill-color"),
+opacitySlider = document.querySelector("#opacity-slider"),
+sizeSlider = document.querySelector("#size-slider"),
+colorBtns = document.querySelectorAll(".colors .option"),
+colorPicker = document.querySelector("#color-picker"),
+clearCanvas = document.querySelector(".clear-canvas"),
+saveImg = document.querySelector(".save-img"),
+importImg =  document.querySelector(".import-img"),
+importMesh =  document.querySelector(".import-glb"),
+ctx = canvas.getContext("2d");
 material.map = new THREE.CanvasTexture(canvas);
-material.map.flipY = false;
 // global variables with default value
 
 var loaded = false;
 //calls
-drawingapp();
 await preload();
-
-
-
-ctx.lineCap = "round";
-ctx.lineJoin = "round";
-ctx.fillStyle = "#fff"; // passing selectedColor as fill style
-ctx.lineWidth = 1; // passing brushSize as line width
-
-console.log(mesh);
-const uv = mesh.geometry.getAttribute('uv');
-// index = mesh.geometry.bufferedAttribute("index")
-// positions = mesh.geometry.bufferedAttribute("position")
-// uv = mesh.geometry.bufferedAttribute("uv")
-
-let maxU = 0;
-let maxV = 0;
-for (let i = 0; i < uv.count; i ++) {
-    maxU = Math.max(maxU, uv.array[i*2]);
-    maxV = Math.max(maxV, uv.array[i*2 + 1]);
-}
-console.log("MaxU: " + maxU);
-console.log("MaxV: " + maxV);
-
-let index = mesh.geometry.getIndex();
-for (let j = 0; j < index.count; j += 3) {
-    let i0 = index.array[j]*2;
-    let i1 = index.array[j + 1]*2;
-    let i2 = index.array[j + 2]*2;
-    console.log(i0, i1, i2);
-    ctx.beginPath(); // creating new path to draw
-    ctx.moveTo(uv.array[i0] * canvas.width, uv.array[i0 + 1] * canvas.height); // creating line according to the mouse pointer
-    ctx.lineTo(uv.array[i1] * canvas.width, uv.array[i1 + 1] * canvas.height); // creating line according to the mouse pointer
-    ctx.stroke(); // drawing/filling line with color
-    ctx.lineTo(uv.array[i2] * canvas.width, uv.array[i2 + 1] * canvas.height); // creating line according to the mouse pointer
-    ctx.stroke(); // drawing/filling line with color
-    ctx.lineTo(uv.array[i0] * canvas.width, uv.array[i0 + 1] * canvas.height); // creating line according to the mouse pointer
-    ctx.stroke(); // drawing/filling line with color
-    ctx.closePath();
-    // ctx.stroke(); // drawing/filling line with color
-}
-
 console.log("post_load");
+drawingapp();
 animate();
 
 
@@ -152,16 +110,16 @@ function drawingapp() {
         snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
         //setting lastbrushx and lastbrushy
-        raycaster.setFromCamera(pointer, camera);
+        raycaster.setFromCamera( pointer, camera );
         //cast a ray and find uv coordinates to draw onto
         const intersects = raycaster.intersectObjects(scene.children);
         if (intersects.length > 0) {
-            controls.enabled = false;
-            //the raycaster found a face to paint on
-            const intersection = intersects[0];
-            //calculating brsuh positions from uv coordinates
-            lastBrushX = intersection.uv.x * canvas.width;
-            lastBrushY = (1 - intersection.uv.y) * canvas.height; //top left corner is 0
+             controls.enabled = false;
+             //the raycaster found a face to paint on
+             const intersection = intersects[0];
+             //calculating brsuh positions from uv coordinates
+            lastBrushX = intersection.uv.x*canvas.width;
+            lastBrushY = (1 - intersection.uv.y)*canvas.height; //top left corner is 0
         }
 
     }
@@ -173,20 +131,19 @@ function drawingapp() {
             if (drawingOnCanvas) {
                 ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
                 ctx.stroke(); // drawing/filling line with color
-                material.map = new THREE.CanvasTexture(canvas);
-                material.map.flipY = false;
-            } else if (drawingOnMesh) {
-                raycaster.setFromCamera(pointer, camera);
-                //cast a ray and find uv coordinates to draw onto
-                const intersects = raycaster.intersectObjects(scene.children);
-                if (intersects.length > 0) {
+                material.map =  new THREE.CanvasTexture(canvas);
+            }  else if (drawingOnMesh) {
+                raycaster.setFromCamera( pointer, camera );
+               //cast a ray and find uv coordinates to draw onto
+               const intersects = raycaster.intersectObjects(scene.children);
+               if (intersects.length > 0) {
                     controls.enabled = false;
                     //the raycaster found a face to paint on
                     const intersection = intersects[0];
                     //calculating brsuh positions from uv coordinates
 
-                    var brushX = intersection.uv.x * canvas.width;
-                    var brushY = (1 - intersection.uv.y) * canvas.height; //top left corner is 0
+                    var brushX = intersection.uv.x*canvas.width;
+                    var brushY = (1 - intersection.uv.y)*canvas.height; //top left corner is 0
 
                     if ((Math.abs(brushX - lastBrushX) < 30) && (Math.abs(brushY - lastBrushY) < 30)) {
 
@@ -201,9 +158,10 @@ function drawingapp() {
                     lastBrushX = brushX;
                     lastBrushY = brushY;
 
-                    material.map = new THREE.CanvasTexture(canvas);
-                    material.map.flipY = false;
-                }
+
+
+                    material.map =  new THREE.CanvasTexture(canvas);
+               }
             }
         }
 
@@ -221,15 +179,15 @@ function drawingapp() {
     });
 
     opacitySlider.addEventListener("change", () => { // passing slider value as opacity
-        opacity = opacitySlider.value / 100.0;
+        opacity = opacitySlider.value/100.0;
     });
     // brush size cursor display change
-    document.onmousemove = function (e) {
+    document.onmousemove = function(e){
         var circle = document.getElementById("circle");
-        circle.style.top = e.clientY + "px";
-        circle.style.left = e.clientX + "px";
-        circle.style.width = brushWidth + "px";
-        circle.style.height = brushWidth + "px";
+        circle.style.top = e.clientY+"px";
+        circle.style.left = e.clientX+"px";
+        circle.style.width = brushWidth+"px";
+        circle.style.height = brushWidth+"px";
     }
     colorBtns.forEach(btn => {
         btn.addEventListener("click", () => { // adding click event to all color button
@@ -247,8 +205,7 @@ function drawingapp() {
     });
     clearCanvas.addEventListener("click", () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
-        material.map = new THREE.CanvasTexture(canvas);
-        material.map.flipY = false;
+        material.map =new THREE.CanvasTexture(canvas);
         setCanvasBackground();
     });
     saveImg.addEventListener("click", () => {
@@ -275,9 +232,9 @@ function drawingapp() {
 
     //event listeners for the 3d viewer
     renderer.domElement.addEventListener('mousedown', (event) => {
-        raycaster.setFromCamera(pointer, camera);
-        raycaster.intersectObjects(scene.children)
-        if (raycaster.intersectObjects(scene.children).length > 0) {
+        raycaster.setFromCamera( pointer, camera );
+        raycaster.intersectObjects( scene.children )
+        if (raycaster.intersectObjects( scene.children ).length > 0) {
             drawingOnMesh = true;
         }
         drawingOnCanvas = false;
@@ -295,14 +252,14 @@ function drawingapp() {
         isDrawing = false;
     });
 
-    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener( 'pointermove', onPointerMove );
 
-    function onPointerMove(event) {
+    function onPointerMove( event ) {
 
         // calculate pointer position in normalized device coordinates
         // (-1 to +1) for both components
-        pointer.x = ((event.pageX - container.offsetLeft) / container.offsetWidth) * 2 - 1;
-        pointer.y = - ((event.pageY - container.offsetTop) / container.offsetHeight) * 2 + 1;
+        pointer.x = (( event.pageX - container.offsetLeft ) / container.offsetWidth )* 2 - 1;
+        pointer.y = - (( event.pageY - container.offsetTop ) / container.offsetHeight )* 2 + 1;
 
 
     }
@@ -325,7 +282,7 @@ async function preload() {
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
-    renderer.render(scene, camera);
+    renderer.render(scene,camera);
 }
 async function addLights() {
     // Adding lighting
@@ -348,7 +305,7 @@ async function addMeshes() {
 
     //lets just do a cube to debug for now
     //material = new THREE.MeshPhongMaterial({color:0xffffff});
-    // mesh = new THREE.Mesh( new THREE.BoxGeometry( 5,5,5 ), material );
+	// mesh = new THREE.Mesh( new THREE.BoxGeometry( 5,5,5 ), material );
     // console.log(mesh)
     // scene.add(mesh);
     // meshes.push(mesh);
@@ -372,12 +329,12 @@ async function addMeshes() {
             console.log("then.");
         })
         .catch((error) => {
-            console.error('An error happened', error);
+                console.error('An error happened', error);
         });
 }
 
 //event listeners
-window.addEventListener("resize", function () {
+window.addEventListener("resize", function() {
     var width = container.clientWidth;
     var height = container.clientHeight;
     renderer.setSize(width, height);
