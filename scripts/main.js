@@ -24,13 +24,14 @@ const controls = new OrbitControls( camera, renderer.domElement );
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
 
-//const gui = new GUI();
 
 //initiailizing materials first so the canvas can read off of it
+
+let filepath = '../models/cow_unwrapped.gltf'; //for addMeshes
 let material = new THREE.MeshPhongMaterial( {
     side: THREE.DoubleSide,
     flatShading: true,
-} );
+} ); //for canvas initialization
 let mesh;
 let lights = [];
 
@@ -56,6 +57,7 @@ material.map = new THREE.CanvasTexture(canvas);
 preload();
 drawingapp();
 animate();
+
 
 
 //Drawing app for the canvas
@@ -212,6 +214,28 @@ async function drawingapp() {
         link.href = canvas.toDataURL(); // passing canvasData as link href value
         link.click(); // clicking link to download image
     });
+    importImg.addEventListener("click", () => {
+        // TODO: Import an image into the scene and have it appear on the drawing app canvas. 
+        // You may wanna look at CanvasRenderingContext2D's drawImage() down below:
+        // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+        // Useful variables to keep track of:
+        //  canvas - the drawing app canvas
+        //  ctx - a CanvasRenderingContext2D instance. Handles all the 2D drawing stuff
+        console.log("does nothing rn")
+    });
+    importMesh.addEventListener("click", () => {
+        // TODO: Import a mesh into the scene and replace it with the cow. 
+        //You may wanna read this for more context: 
+        // https://threejs.org/docs/#manual/en/introduction/Loading-3D-models
+        // https://threejs.org/docs/index.html#examples/en/loaders/GLTFLoader
+        // replace it with the cow by assigning the variable "mesh" to the newly imported mesh
+        // we may need to do this differently idk how any of this works
+        //Useful variables to keep track of:
+        // filepath - filepath of the imported mesh local to this repo
+        // addMeshes(file_path) - takes a string of a filepath as an argument to load and 
+        //    reassign the variable "mesh" to the newly imported mesh
+        console.log("does nothing rn")
+    });
 
 
     canvas.addEventListener("mousedown", (event) => {
@@ -267,9 +291,10 @@ async function drawingapp() {
 async function preload() {
     //textures is a list of textures available to use, and populates the textures list
     //addTextures();
-    addMeshes();
+    addMeshes(filepath);
      //lights is a list of lights in the scene, and populates the lights list
     addLights();
+    
     //creates the menubar
     //createdatgui();
     //meshes is a list of meshes in the scene, and populates the meshes list
@@ -296,7 +321,7 @@ function addLights() {
     lights.push(directionalLightBottom);
     
 }
-function addMeshes() {
+function addMeshes(file_path) {
     //rendering a simple cube for now (CHANGE TO A 3D MESH)
 
     //lets just do a cube to debug for now
@@ -308,7 +333,7 @@ function addMeshes() {
     const loader = new GLTFLoader();
     //loading the cow
     loader.load(
-        '../models/cow_unwrapped.glb',
+        file_path,
         function (gltf) {
             const modelGeometry = gltf.scene.children[0].geometry;
             var loader = new THREE.TextureLoader();
@@ -316,6 +341,7 @@ function addMeshes() {
             mesh = new THREE.Mesh(modelGeometry,  material);
             mesh.scale.set(5, 5, 5);
             scene.add(mesh);
+            console.log(mesh)
         },
         // if 100% means loaded
         function (xhr) {
