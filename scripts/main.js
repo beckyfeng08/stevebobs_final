@@ -103,7 +103,7 @@ async function drawingapp() {
         ctx.fillStyle = "#fff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = selectedColor;
-        ctx_uv.clearRect(0, 0, uvmesh.width, uvmesh.height);
+        // ctx_uv.clearRect(0, 0, uvmesh.width, uvmesh.height);
     }
     window.addEventListener("load", () => {
         // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
