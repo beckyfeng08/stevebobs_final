@@ -169,7 +169,7 @@ section {
 }
 
 .buttons .clear-canvas {
-    color: #6C757D;
+    color: #51565b;
     border: 1px solid #6C757D;
     transition: all 0.3s ease;
 }
@@ -178,9 +178,23 @@ section {
     color: #fff;
     background: #6C757D;
 }
+.buttons .import-img {
+    background: #8D6EC7;
+    border: 1px solid #8D6EC7;
+    transition: all 0.3s ease;
+}
+.buttons .import-img:hover {
+    background: #9e88c8;
+    border: 1px solid #8D6EC7;
+}
 
 .buttons .save-img {
     background: #8D6EC7;
+    border: 1px solid #8D6EC7;
+    transition: all 0.3s ease;
+}
+.buttons .save-img:hover {
+    background: #9e88c8;
     border: 1px solid #8D6EC7;
 }
 

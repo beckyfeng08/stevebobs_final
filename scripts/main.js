@@ -23,6 +23,7 @@ const controls = new OrbitControls( camera, renderer.domElement );
 
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();
+
 //const gui = new GUI();
 
 //initiailizing materials first so the canvas can read off of it
@@ -82,6 +83,8 @@ async function drawingapp() {
         canvas.height = canvas.offsetHeight;
         // setCanvasBackground();
     });
+    let lastBrushX;
+    let lastBrushY;
   
     const startDraw = (e) => {
         
@@ -100,34 +103,58 @@ async function drawingapp() {
         ctx.strokeStyle = selectedColor; // passing selectedColor as stroke style
         // copying canvas data & passing as snapshot value.. this avoids dragging the image
         snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        //setting lastbrushx and lastbrushy 
+        raycaster.setFromCamera( pointer, camera );
+        //cast a ray and find uv coordinates to draw onto
+        const intersects = raycaster.intersectObjects(scene.children);
+        if (intersects.length > 0) {
+             controls.enabled = false;
+             //the raycaster found a face to paint on
+             const intersection = intersects[0];
+             //calculating brsuh positions from uv coordinates
+            lastBrushX = intersection.uv.x*canvas.width;
+            lastBrushY = (1 - intersection.uv.y)*canvas.height; //top left corner is 0 
+        }
      
     }
     const drawing = (e) => {
         
         if (!isDrawing) return; // if isDrawing is false return from here
         ctx.putImageData(snapshot, 0, 0); // adding copied canvas data on to this canvas
-        console.log(drawingOnMesh)
         if (selectedTool === "brush" || selectedTool === "eraser") {
             if (drawingOnCanvas) {
                 ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
                 ctx.stroke(); // drawing/filling line with color
                 material.map =  new THREE.CanvasTexture(canvas);
             }  else if (drawingOnMesh) {
-                
                 raycaster.setFromCamera( pointer, camera );
                //cast a ray and find uv coordinates to draw onto
                const intersects = raycaster.intersectObjects(scene.children);
-               console.log(intersects)
                if (intersects.length > 0) {
                     controls.enabled = false;
                     //the raycaster found a face to paint on
                     const intersection = intersects[0];
                     //calculating brsuh positions from uv coordinates
-                    
+                  
                     var brushX = intersection.uv.x*canvas.width;
                     var brushY = (1 - intersection.uv.y)*canvas.height; //top left corner is 0
-                    ctx.lineTo(brushX, brushY); // creating line according to the mouse pointer
-                    ctx.stroke(); // drawing/filling line with color
+                    console.log(brushY, lastBrushY)
+                    if ((Math.abs(brushX - lastBrushX) < 10) && (Math.abs(brushY - lastBrushY) < 10)) {
+                        console.log("poop")
+                        ctx.lineTo(brushX, brushY); // creating line according to the mouse pointer
+                        ctx.stroke(); // drawing/filling line with color
+                        //saving the last positions
+                    } else {
+                        ctx.lineTo(lastBrushX, lastBrushY); // creating line according to the mouse pointer
+                        ctx.stroke();
+                        startDraw(e);
+                    }
+                    lastBrushX = brushX;
+                    lastBrushY = brushY;
+                    
+                    
+
                     material.map =  new THREE.CanvasTexture(canvas);
                }  
             }
@@ -203,8 +230,8 @@ async function drawingapp() {
         
     
     });
-    renderer.domElement.addEventListener('mousemove', () => {
-        drawing();
+    renderer.domElement.addEventListener('mousemove', (event) => {
+        drawing(event);
     });
     renderer.domElement.addEventListener('mouseup', () => {
         controls.enabled = true;

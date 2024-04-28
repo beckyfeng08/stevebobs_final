@@ -164,7 +164,7 @@ section {
 }
 
 .buttons .clear-canvas {
-    color: #6C757D;
+    color: #b1c0cc;
     border: 1px solid #6C757D;
     transition: all 0.3s ease;
 }
@@ -177,6 +177,14 @@ section {
 .buttons .save-img {
     background: #8D6EC7;
     border: 1px solid #8D6EC7;
+}
+.buttons .import-img {
+    background: #8D6EC7;
+    border: 1px solid #8D6EC7;
+}
+.import-img:hover {
+    color: #fff;
+    background: #6C757D;
 }
 
 .drawing-board {
