@@ -212,21 +212,32 @@ section {
 }
 .buttons .save-img:hover {
     background: #9e88c8;
-    
+
     border: 1px solid #8D6EC7;
 }
 
 .drawing-board {
     flex: 1;
     overflow: hidden;
+    position: relative;
 }
 
-    .drawing-board canvas {
-        background: #fff;
-        width: 500px;
-        height: 500px;
-    }
+.drawing-board :hover {
+    cursor: none;
+}
 
-    .drawing-board :hover {
-        cursor: none;
+.drawing-board canvas {
+    /* background:white; */
+    position: absolute;
+    width: 500px;
+    height: 500px;
+}
+
+#uv-layer {
+    z-index: 1;
+    background: white;
+}
+
+#drawingapp {
+    z-index: 2;
 }

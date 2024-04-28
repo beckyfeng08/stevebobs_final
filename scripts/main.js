@@ -37,72 +37,120 @@ let lights = [];
 
 //drawing app init items
 const canvas = document.getElementById("drawingapp"),
+    uvmesh = document.getElementById("uv-layer"),
     toolBtns = document.querySelectorAll(".tool"),
     fillColor = document.querySelector("#fill-color"),
     opacitySlider = document.querySelector("#opacity-slider"),
     sizeSlider = document.querySelector("#size-slider"),
     colorBtns = document.querySelectorAll(".colors .option"),
+    uvBtn = document.getElementById("uv-button"),
     colorPicker = document.querySelector("#color-picker"),
     clearCanvas = document.querySelector(".clear-canvas"),
     saveImg = document.querySelector(".save-img"),
     importImg = document.querySelector(".import-img"),
     importMesh = document.querySelector(".import-glb"),
-    ctx = canvas.getContext("2d");
+    ctx = canvas.getContext("2d"),
+    ctx_uv = uvmesh.getContext("2d");
 material.map = new THREE.CanvasTexture(canvas);
 // global variables with default value
 
-var loaded = false;
 //calls
+var loaded = false;
 drawingapp();
 await preload();
+loaded = true;
 
-
-
-ctx.lineCap = "round";
-ctx.lineJoin = "round";
-ctx.fillStyle = "#fff"; // passing selectedColor as fill style
-ctx.lineWidth = 1; // passing brushSize as line width
-
-console.log(mesh);
-const uv = mesh.geometry.getAttribute('uv');
-// index = mesh.geometry.bufferedAttribute("index")
-// positions = mesh.geometry.bufferedAttribute("position")
-// uv = mesh.geometry.bufferedAttribute("uv")
-
-let maxU = 0;
-let maxV = 0;
-for (let i = 0; i < uv.count; i ++) {
-    maxU = Math.max(maxU, uv.array[i*2]);
-    maxV = Math.max(maxV, uv.array[i*2 + 1]);
-}
-console.log("MaxU: " + maxU);
-console.log("MaxV: " + maxV);
-
-let index = mesh.geometry.getIndex();
-for (let j = 0; j < index.count; j += 3) {
-    let i0 = index.array[j]*2;
-    let i1 = index.array[j + 1]*2;
-    let i2 = index.array[j + 2]*2;
-    console.log(i0, i1, i2);
-    ctx.beginPath(); // creating new path to draw
-    ctx.moveTo(uv.array[i0] * canvas.width, (1 - uv.array[i0 + 1]) * canvas.height); // creating line according to the mouse pointer
-    ctx.lineTo(uv.array[i1] * canvas.width, (1 - uv.array[i1 + 1]) * canvas.height); // creating line according to the mouse pointer
-    ctx.stroke(); // drawing/filling line with color
-    ctx.lineTo(uv.array[i2] * canvas.width, (1 - uv.array[i2 + 1]) * canvas.height); // creating line according to the mouse pointer
-    ctx.stroke(); // drawing/filling line with color
-    ctx.lineTo(uv.array[i0] * canvas.width, (1 - uv.array[i0 + 1]) * canvas.height); // creating line according to the mouse pointer
-    ctx.stroke(); // drawing/filling line with color
-    ctx.closePath();
-    // ctx.stroke(); // drawing/filling line with color
-}
-
-console.log("post_load");
+console.log("All load finished.");
+drawUV();
 animate();
 
 
+//main functions
+async function preload() {
+    //textures is a list of textures available to use, and populates the textures list
+    //addTextures();
+    //lights is a list of lights in the scene, and populates the lights list
+    return Promise.all([addMeshes(), addLights()]).then(() => {
+        console.log("Loading done.");
+    });
+    //creates the menubar
+    //createdatgui();
+    //meshes is a list of meshes in the scene, and populates the meshes list
+    // setTimeout(()=>"waiting to load", 1000);
+}
+
+async function addLights() {
+    // Adding lighting
+
+    const directionalLightTop = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLightTop.position.set(0, 1, 0);
+    const directionalLightBottom = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLightBottom.position.set(-1, -1, 0);
+    const hemlight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+    scene.add(hemlight);
+    scene.add(directionalLightTop);
+    scene.add(directionalLightBottom);
+    lights.push(hemlight);
+    lights.push(directionalLightTop);
+    lights.push(directionalLightBottom);
+    return Promise.resolve(1).then(() => { console.log("Loaded Lights.") });
+}
+async function addMeshes() {
+    //rendering a simple cube for now (CHANGE TO A 3D MESH)
+
+    //lets just do a cube to debug for now
+    //material = new THREE.MeshPhongMaterial({color:0xffffff});
+    // mesh = new THREE.Mesh( new THREE.BoxGeometry( 5,5,5 ), material );
+    // console.log(mesh)
+    // scene.add(mesh);
+    // meshes.push(mesh);
+    const loader = new GLTFLoader();
+    //loading the cow
+    return loader.loadAsync('../models/cow_unwrapped.glb',
+        // if 100% means loaded
+        function (xhr) {
+            console.log("Mesh loaded successfully");
+
+        })
+        .then((gltf) => {
+            const modelGeometry = gltf.scene.children[0].geometry;
+            var loader = new THREE.TextureLoader();
+
+            mesh = new THREE.Mesh(modelGeometry, material);
+            mesh.scale.set(5, 5, 5);
+            scene.add(mesh);
+        })
+        .catch((error) => {
+            console.error('An error happened', error);
+        });
+}
+
+function drawUV() {
+    ctx_uv.lineCap = "round";
+    ctx_uv.lineJoin = "round";
+    ctx_uv.fillStyle = "#fff"; // passing selectedColor as fill style
+    ctx_uv.lineWidth = 1; // passing brushSize as line width
+
+    const uv = mesh.geometry.getAttribute('uv');
+    let index = mesh.geometry.getIndex();
+    for (let j = 0; j < index.count; j += 3) {
+        let i0 = index.array[j] * 2;
+        let i1 = index.array[j + 1] * 2;
+        let i2 = index.array[j + 2] * 2;
+        ctx_uv.beginPath();
+        ctx_uv.moveTo(uv.array[i0] * uvmesh.width, (1 - uv.array[i0 + 1]) * uvmesh.height);
+        ctx_uv.lineTo(uv.array[i1] * uvmesh.width, (1 - uv.array[i1 + 1]) * uvmesh.height);
+        ctx_uv.stroke();
+        ctx_uv.lineTo(uv.array[i2] * uvmesh.width, (1 - uv.array[i2 + 1]) * uvmesh.height);
+        ctx_uv.stroke();
+        ctx_uv.lineTo(uv.array[i0] * uvmesh.width, (1 - uv.array[i0 + 1]) * uvmesh.height);
+        ctx_uv.stroke();
+        ctx_uv.closePath();
+    }
+}
+
 //Drawing app for the canvas
 function drawingapp() {
-    console.log("Loaded: " + loaded);
     let drawingOnMesh = false;
     let drawingOnCanvas = false;
     let prevMouseX, prevMouseY, snapshot,
@@ -110,26 +158,34 @@ function drawingapp() {
         selectedTool = "brush",
         brushWidth = 5,
         opacity = 1,
-        selectedColor = "#000";
+        selectedColor = "#000",
+        showUV = true;
     const setCanvasBackground = () => {
         // setting whole canvas background to white, so the downloaded img background will be white
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = selectedColor; // setting fillstyle back to the selectedColor, it'll be the brush color
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx_uv.fillStyle = "#fff";
+        ctx_uv.fillRect(0, 0, uvmesh.width, uvmesh.height);
+        if (showUV && loaded) {
+            drawUV();
+        }
     }
     window.addEventListener("load", () => {
         // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
+        uvmesh.width = uvmesh.offsetWidth;
+        uvmesh.height = uvmesh.offsetHeight;
         setCanvasBackground();
     });
 
-    window.addEventListener("resize", () => {
-        // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-        // setCanvasBackground();
-    });
+    // window.addEventListener("resize", () => {
+    //     // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
+    //     canvas.width = canvas.offsetWidth;
+    //     canvas.height = canvas.offsetHeight;
+    //     uvmesh.width = uvmesh.offsetWidth;
+    //     uvmesh.height = uvmesh.offsetHeight;
+    //     // setCanvasBackground();
+    // });
     let lastBrushX;
     let lastBrushY;
 
@@ -237,6 +293,18 @@ function drawingapp() {
             selectedColor = window.getComputedStyle(btn).getPropertyValue("background-color");
         });
     });
+
+
+    uvBtn.addEventListener("click", () => {
+        showUV = !showUV;
+        if (showUV) {
+            drawUV();
+        }
+        else {
+            ctx_uv.fillRect(0, 0, uvmesh.width, uvmesh.height);
+        }
+    });
+
     colorPicker.addEventListener("change", () => {
         // passing picked color value from color picker to last color btn background
         colorPicker.parentElement.style.background = colorPicker.value;
@@ -304,72 +372,11 @@ function drawingapp() {
     }
 }
 
-//main functions
-async function preload() {
-    //textures is a list of textures available to use, and populates the textures list
-    //addTextures();
-    //lights is a list of lights in the scene, and populates the lights list
-    return Promise.all([addMeshes(), addLights()]).then(() => {
-        console.log("Loading done.");
-    });
-    //creates the menubar
-    //createdatgui();
-    //meshes is a list of meshes in the scene, and populates the meshes list
-    // setTimeout(()=>"waiting to load", 1000);
-}
 //helper functions
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
-}
-async function addLights() {
-    // Adding lighting
-
-    const directionalLightTop = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLightTop.position.set(0, 1, 0);
-    const directionalLightBottom = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLightBottom.position.set(-1, -1, 0);
-    const hemlight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
-    scene.add(hemlight);
-    scene.add(directionalLightTop);
-    scene.add(directionalLightBottom);
-    lights.push(hemlight);
-    lights.push(directionalLightTop);
-    lights.push(directionalLightBottom);
-    return Promise.resolve(1).then(() => { console.log("Loaded Lights.") });
-}
-async function addMeshes() {
-    //rendering a simple cube for now (CHANGE TO A 3D MESH)
-
-    //lets just do a cube to debug for now
-    //material = new THREE.MeshPhongMaterial({color:0xffffff});
-    // mesh = new THREE.Mesh( new THREE.BoxGeometry( 5,5,5 ), material );
-    // console.log(mesh)
-    // scene.add(mesh);
-    // meshes.push(mesh);
-    const loader = new GLTFLoader();
-    //loading the cow
-    return loader.loadAsync('../models/cow_unwrapped.glb',
-        // if 100% means loaded
-        function (xhr) {
-            console.log("Mesh loaded successfully");
-            loaded = true;
-
-        })
-        .then((gltf) => {
-            const modelGeometry = gltf.scene.children[0].geometry;
-            var loader = new THREE.TextureLoader();
-
-            mesh = new THREE.Mesh(modelGeometry, material);
-            mesh.scale.set(5, 5, 5);
-            scene.add(mesh);
-            loaded = true;
-            console.log("then.");
-        })
-        .catch((error) => {
-            console.error('An error happened', error);
-        });
 }
 
 //event listeners

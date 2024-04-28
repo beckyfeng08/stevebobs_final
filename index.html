@@ -15,11 +15,13 @@
 
   <body>
     <div id="viewer"></div>
-    
+
     <!-- draiwing app part -->
     <div class="container">
-      
+
       <section class="drawing-board">
+          <!-- <canvas id="ui-layer"></canvas> -->
+          <canvas id="uv-layer"></canvas>
           <canvas id="drawingapp"></canvas>
       </section>
       <section class="tools-board">
@@ -65,8 +67,8 @@
                     <span>Opacity</span>
                 </li>
                 <li class="option">
-                    
-                    
+
+
                     <input type="range" id="opacity-slider" min="0" max="100" value="100">
                 </li>
             </ul>
@@ -85,6 +87,7 @@
         </div>
         <div class="row buttons">
             <button class="import-glb">Import GLTF/GLB</button>
+            <button id="uv-button">Toggle UV Display</button>
             <button class="import-img">Import Image</button>
             <button class="clear-canvas">Clear Canvas</button>
             <button class="save-img">Download Texture</button>
