@@ -111,6 +111,7 @@ async function drawingapp() {
         canvas.height = canvas.offsetHeight;
         uvmesh.width = uvmesh.offsetWidth;
         uvmesh.height = uvmesh.offsetHeight;
+        console.log("hello")
         setCanvasBackground();
     });
 
