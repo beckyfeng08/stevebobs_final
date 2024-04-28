@@ -37,7 +37,7 @@ let material = new THREE.MeshPhongMaterial( {
 } ); //for canvas initialization
 let mesh;
 let currmeshindex = 0;
-let meshes = ["/models/cow_unwrapped.gltf", "/models/animeface.gltf"]
+let meshes = ["/models/cow_unwrapped.gltf", "/models/animeface.gltf",  "/models/bunny.gltf"]
 let lights = [];
 
 
