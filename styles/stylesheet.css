@@ -32,6 +32,7 @@ body {
     justify-content: center;
     min-height: 100vh;
     background: #B19CD9;
+    padding-left: 50px;
 }
 
 .container {
@@ -41,6 +42,7 @@ body {
     gap: 10px;
     padding: 10px;
     max-width: 1050px;
+    margin-right: 10px;
 }
 
 section {
@@ -49,7 +51,10 @@ section {
 
 .tools-board {
     width: 210px;
-    padding: 15px 22px 0;
+    padding: 10px 20px 0;
+    margin-right: 15px;
+    background: #ffffff;
+
 }
 
     .tools-board .row {
@@ -116,25 +121,29 @@ section {
     position: relative;
 }
 
-    .colors .option:nth-child(1) {
-        background-color: #fff;
+    /* .colors .option:nth-child(1) {
+        background-color: #ffffff;
         border: 1px solid #bfbfbf;
-    }
+    } */
 
-    .colors .option:nth-child(2) {
+    .colors .option:nth-child(1) {
         background-color: #000;
     }
 
-    /* .colors .option:nth-child(3) {
+    .colors .option:nth-child(2) {
         background-color: #E02020;
     }
 
-    .colors .option:nth-child(4) {
+    .colors .option:nth-child(3) {
         background-color: #6DD400;
-    } */
+    }
+
+    .colors .option:nth-child(4) {
+        background-color: #4A98F7;
+    }
 
     .colors .option:nth-child(5) {
-        background-color: #4A98F7;
+        background-color: #910b62;
         border-radius: 5px;
     }
 
@@ -154,7 +163,6 @@ section {
     .colors .option:first-child.selected::before {
         border-color: #ccc;
     }
-
 
 .option #color-picker {
     opacity: 0;
@@ -206,6 +214,16 @@ section {
     border: 1px solid #8D6EC7;
 }
 
+.buttons .uv-button {
+    background: #3d2e48;
+    border: 1px solid #8D6EC7;
+    transition: all 0.3s ease;
+}
+.buttons .uv-button:hover {
+    background: #745e9c;
+    border: 1px solid #8D6EC7;
+}
+
 .buttons .save-img {
     background: #6C757D;
     border: 1px solid #8D6EC7;
@@ -217,6 +235,7 @@ section {
     border: 1px solid #8D6EC7;
 }
 .buttons .generate-mesh {
+    margin-top: 5px;
     background: #3d2e48;
     border: 1px solid #8D6EC7;
     transition: all 0.3s ease;
@@ -237,6 +256,8 @@ section {
     position: absolute;
     width: 500px;
     height: 500px;
+    margin-top: 40px;
+    margin-left: 20px;
 }
 
 #uv-layer {

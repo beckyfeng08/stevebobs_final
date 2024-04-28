@@ -47,7 +47,7 @@ const canvas = document.getElementById("drawingapp"),
     opacitySlider = document.querySelector("#opacity-slider"),
     sizeSlider = document.querySelector("#size-slider"),
     colorBtns = document.querySelectorAll(".colors .option"),
-    uvBtn = document.getElementById("uv-button"),
+    uvBtn = document.querySelector(".uv-button"),
     colorPicker = document.querySelector("#color-picker"),
     generateMesh = document.querySelector(".generate-mesh"),
     clearCanvas = document.querySelector(".clear-canvas"),
@@ -133,6 +133,9 @@ async function drawingapp() {
         ctx.lineWidth = brushWidth; // passing brushSize as line width
         ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
 
+        // ctx.lineTo(e.offsetX, e.offsetX); // creating line according to the mouse pointer
+        // ctx.stroke(); // drawing/filling line with color
+
         // copying canvas data & passing as snapshot value.. this avoids dragging the image
         snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -167,7 +170,7 @@ async function drawingapp() {
                     controls.enabled = false;
                     //the raycaster found a face to paint on
                     const intersection = intersects[0];
-                    //calculating brsuh positions from uv coordinates
+                    //calculating brush positions from uv coordinates
 
                     var brushX = intersection.uv.x * canvas.width;
                     var brushY = (1 - intersection.uv.y) * canvas.height; //top left corner is 0
