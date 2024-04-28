@@ -60,6 +60,7 @@ material.map = new THREE.CanvasTexture(canvas);
 //calls
 drawingapp();
 await preload();
+
 drawUV();
 animate();
 
@@ -350,6 +351,7 @@ async function preload() {
 }
 //helper functions
 function animate() {
+    console.log(mesh.material)
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene,camera);
