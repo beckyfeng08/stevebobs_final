@@ -27,12 +27,9 @@ const pointer = new THREE.Vector2();
 
 
 //initiailizing materials first so the canvas can read off of it
-
 let filepath = '../models/animeface.gltf'; //for addMeshes
 let material = new THREE.MeshPhongMaterial( {
     side: THREE.DoubleSide,
- 
-
     
 } ); //for canvas initialization
 let mesh;
@@ -43,28 +40,52 @@ let lights = [];
 
 //drawing app init items
 const canvas = document.getElementById("drawingapp"),
+uvmesh = document.getElementById("uv-layer"),
 toolBtns = document.querySelectorAll(".tool"),
 fillColor = document.querySelector("#fill-color"),
 opacitySlider = document.querySelector("#opacity-slider"),
 sizeSlider = document.querySelector("#size-slider"),
 colorBtns = document.querySelectorAll(".colors .option"),
+uvBtn = document.getElementById("uv-button"),
 colorPicker = document.querySelector("#color-picker"),
 generateMesh =  document.querySelector(".generate-mesh"),
 clearCanvas = document.querySelector(".clear-canvas"),
 saveImg = document.querySelector(".save-img"),
 importImg =  document.querySelector(".import-img"),
 importMesh =  document.querySelector(".import-glb"),
-ctx = canvas.getContext("2d");
+ctx = canvas.getContext("2d"),
+ctx_uv = uvmesh.getContext("2d");
 material.map = new THREE.CanvasTexture(canvas);
-// global variables with default value
-
 
 //calls
-preload();
 drawingapp();
+await preload();
+drawUV();
 animate();
 
+function drawUV() {
+    ctx_uv.lineCap = "round";
+    ctx_uv.lineJoin = "round";
+    ctx_uv.fillStyle = "#fff"; // passing selectedColor as fill style
+    ctx_uv.lineWidth = 1; // passing brushSize as line width
 
+    const uv = mesh.geometry.getAttribute('uv');
+    let index = mesh.geometry.getIndex();
+    for (let j = 0; j < index.count; j += 3) {
+        let i0 = index.array[j] * 2;
+        let i1 = index.array[j + 1] * 2;
+        let i2 = index.array[j + 2] * 2;
+        ctx_uv.beginPath();
+        ctx_uv.moveTo(uv.array[i0] * uvmesh.width, (1 - uv.array[i0 + 1]) * uvmesh.height);
+        ctx_uv.lineTo(uv.array[i1] * uvmesh.width, (1 - uv.array[i1 + 1]) * uvmesh.height);
+        ctx_uv.stroke();
+        ctx_uv.lineTo(uv.array[i2] * uvmesh.width, (1 - uv.array[i2 + 1]) * uvmesh.height);
+        ctx_uv.stroke();
+        ctx_uv.lineTo(uv.array[i0] * uvmesh.width, (1 - uv.array[i0 + 1]) * uvmesh.height);
+        ctx_uv.stroke();
+        ctx_uv.closePath();
+    }
+}
 
 //Drawing app for the canvas
 async function drawingapp() {
@@ -160,8 +181,6 @@ async function drawingapp() {
                     lastBrushX = brushX;
                     lastBrushY = brushY;
                     
-                    
-
                     material.map =  new THREE.CanvasTexture(canvas);
                }  
             }
@@ -217,12 +236,7 @@ async function drawingapp() {
         link.click(); // clicking link to download image
     });
     importImg.addEventListener("click", () => {
-        // TODO: Import an image into the scene and have it appear on the drawing app canvas. 
-        // You may wanna look at CanvasRenderingContext2D's drawImage() down below:
-        // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-        // Useful variables to keep track of:
-        //  canvas - the drawing app canvas
-        //  ctx - a CanvasRenderingContext2D instance. Handles all the 2D drawing stuff
+       
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
@@ -233,8 +247,11 @@ async function drawingapp() {
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
+                    setCanvasBackground();
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     material.map = new THREE.CanvasTexture(canvas);
+                
                 };
                 img.src = event.target.result;
             };
@@ -242,8 +259,6 @@ async function drawingapp() {
         };
         input.click();
 
-
-        console.log("does smthg rn")
     });
     importMesh.addEventListener("click", () => {
         // TODO: HANDLE LOADING A MESH into the scene and replace it with the cow. 
@@ -263,25 +278,9 @@ async function drawingapp() {
             const file = event.target.files[0];
             if (!file) return;
             const url = URL.createObjectURL(file);
-            const loader = new THREE.GLTFLoader();
-            loader.load(
-                url,
-                function (gltf) {
-                    if (mesh) {
-                        scene.remove(mesh);
-                    }
-                    mesh = gltf.scene;
-                    scene.add(mesh);
-    
-                    controls.reset();
-                },
-                function (xhr) {
-                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-                },
-                function (error) {
-                    console.error('An error occurred while loading the GLTF model:', error);
-                }
-            );
+            meshes.push(url)
+            currmeshindex = meshes.length - 1
+            loadMesh(currmeshindex)
         };
         input.click();
 
@@ -345,16 +344,9 @@ async function drawingapp() {
 
 //main functions
 async function preload() {
-    //textures is a list of textures available to use, and populates the textures list
-    //addTextures();
-    loadMesh(currmeshindex);
-     //lights is a list of lights in the scene, and populates the lights list
-    addLights();
-    
-    //creates the menubar
-    //createdatgui();
-    //meshes is a list of meshes in the scene, and populates the meshes list
-    setTimeout(()=>"waiting to load", 1000);
+    return Promise.all([loadMesh(), addLights()]).then(() => {
+        console.log("Loading done.");
+    })
 }
 //helper functions
 function animate() {
@@ -362,7 +354,7 @@ function animate() {
     controls.update();
     renderer.render(scene,camera);
 }
-function addLights() {
+async function addLights() {
     // Adding lighting
     const directionalLightTop = new THREE.DirectionalLight(0xffffff, 1);
     directionalLightTop.position.set(0, 1, 0); 
@@ -375,32 +367,32 @@ function addLights() {
     lights.push(hemlight);
     lights.push(directionalLightTop);
     lights.push(directionalLightBottom);
+    return Promise.resolve(1).then(() => { console.log("Loaded Lights.") });
     
 }
-function loadMesh() {
+async function loadMesh() {
     //get rid of the mesh if it's in the scene
+
     scene.remove(mesh)
     filepath = meshes[currmeshindex];
     const loader = new GLTFLoader();
     //loading the cow
-    loader.load(
+    return loader.loadAsync(
         filepath,
-        function (gltf) {
-            const modelGeometry = gltf.scene.children[0].geometry;
-            var loader = new THREE.TextureLoader();
-            
-            mesh = new THREE.Mesh(modelGeometry,  material);
-            mesh.scale.set(5, 5, 5);
-            scene.add(mesh);
-            console.log(mesh)
-        },
+       
         // if 100% means loaded
         function (xhr) {
             console.log("Mesh loaded successfully");
    
-        },
-        // an error callback
-        function (error) {
+        }).then( (gltf) => {
+            const modelGeometry = gltf.scene.children[0].geometry;
+         
+            mesh = new THREE.Mesh(modelGeometry,  material);
+            mesh.scale.set(5, 5, 5);
+            scene.add(mesh);
+            console.log(mesh)
+        })
+        .catch((error) => {
             console.error('An error happened', error);
         });
 

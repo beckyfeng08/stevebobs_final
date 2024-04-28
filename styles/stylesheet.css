@@ -228,13 +228,24 @@ section {
 .drawing-board {
     flex: 1;
     overflow: hidden;
+    position: relative;
 }
 
-    .drawing-board canvas {
-        background: #fff;
-        width: 500px;
-        height: 500px;
-    }
+.drawing-board canvas {
+    /* background:white; */
+    position: absolute;
+    width: 500px;
+    height: 500px;
+}
+
+#uv-layer {
+    z-index: 1;
+    background: white;
+}
+
+#drawingapp {
+    z-index: 2;
+}
 
     .drawing-board :hover {
         cursor: none;
