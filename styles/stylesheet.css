@@ -173,15 +173,27 @@ section {
     cursor: pointer;
 }
 
+.buttons .import-glb {
+    background: #8D6EC7;
+    border: 1px solid #8D6EC7;
+    transition: all 0.3s ease;
+}
+
+.import-glb:hover {
+    background: #9e88c8;
+    border: 1px solid #8D6EC7;
+}
+
 .buttons .clear-canvas {
     color: #51565b;
+    background: rgb(255, 255, 255, 0.6);
     border: 1px solid #6C757D;
     transition: all 0.3s ease;
 }
 
 .clear-canvas:hover {
     color: #fff;
-    background: #6C757D;
+    background: #9e88c8;
 }
 .buttons .import-img {
     background: #8D6EC7;
@@ -194,12 +206,13 @@ section {
 }
 
 .buttons .save-img {
-    background: #8D6EC7;
+    background: #6C757D;
     border: 1px solid #8D6EC7;
     transition: all 0.3s ease;
 }
 .buttons .save-img:hover {
     background: #9e88c8;
+    
     border: 1px solid #8D6EC7;
 }
 

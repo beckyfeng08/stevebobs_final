@@ -45,6 +45,8 @@ colorBtns = document.querySelectorAll(".colors .option"),
 colorPicker = document.querySelector("#color-picker"),
 clearCanvas = document.querySelector(".clear-canvas"),
 saveImg = document.querySelector(".save-img"),
+importImg =  document.querySelector(".import-img"),
+importMesh =  document.querySelector(".import-glb"),
 ctx = canvas.getContext("2d");
 material.map = new THREE.CanvasTexture(canvas);
 // global variables with default value
@@ -201,14 +203,17 @@ async function drawingapp() {
     });
     clearCanvas.addEventListener("click", () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
+        material.map =new THREE.CanvasTexture(canvas);
         setCanvasBackground();
     });
     saveImg.addEventListener("click", () => {
         const link = document.createElement("a"); // creating <a> element
-        link.download = `${Date.now()}.jpg`; // passing current date as link download value
+        link.download = `${Date.now()}.png`; // passing current date as link download value
         link.href = canvas.toDataURL(); // passing canvasData as link href value
         link.click(); // clicking link to download image
     });
+
+
     canvas.addEventListener("mousedown", (event) => {
         drawingOnMesh = false;
         drawingOnCanvas = true;
