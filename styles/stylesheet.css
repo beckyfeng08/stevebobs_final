@@ -215,7 +215,16 @@ section {
     
     border: 1px solid #8D6EC7;
 }
-
+.buttons .generate-mesh {
+    background: #3d2e48;
+    border: 1px solid #8D6EC7;
+    transition: all 0.3s ease;
+}
+.buttons  .generate-mesh:hover {
+    background: #745e9c;
+    
+    border: 1px solid #8D6EC7;
+}
 .drawing-board {
     flex: 1;
     overflow: hidden;

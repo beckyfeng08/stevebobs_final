@@ -36,6 +36,8 @@ let material = new THREE.MeshPhongMaterial( {
     
 } ); //for canvas initialization
 let mesh;
+let currmeshindex = 0;
+let meshes = ["/models/cow_unwrapped.gltf", "/models/animeface.gltf"]
 let lights = [];
 
 
@@ -47,6 +49,7 @@ opacitySlider = document.querySelector("#opacity-slider"),
 sizeSlider = document.querySelector("#size-slider"),
 colorBtns = document.querySelectorAll(".colors .option"),
 colorPicker = document.querySelector("#color-picker"),
+generateMesh =  document.querySelector(".generate-mesh"),
 clearCanvas = document.querySelector(".clear-canvas"),
 saveImg = document.querySelector(".save-img"),
 importImg =  document.querySelector(".import-img"),
@@ -222,17 +225,21 @@ async function drawingapp() {
         console.log("does nothing rn")
     });
     importMesh.addEventListener("click", () => {
-        // TODO: Import a mesh into the scene and replace it with the cow. 
+        // TODO: HANDLE LOADING A MESH into the scene and replace it with the cow. 
         // You may wanna read this for more context: 
-        // https://threejs.org/docs/#manual/en/introduction/Loading-3D-models
-        // https://threejs.org/docs/index.html#examples/en/loaders/GLTFLoader
         // This thread may help: https://stackoverflow.com/questions/67864724/threejs-load-gltf-model-directly-from-file-input
         // creating urls: https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL_static
+        //this guy does the same thing: https://gltf-viewer.donmccurdy.com
+
         //Useful variables to keep track of:
         // filepath - filepath of the imported mesh local to this repo
         // addMeshes(file_path) - takes a string of a filepath as an argument to load and 
         //    reassign the variable "mesh" to the newly imported mesh
         console.log("does nothing rn")
+    });
+    generateMesh.addEventListener("click", () => {
+        currmeshindex = (currmeshindex + 1) % meshes.length;
+        loadMesh()
     });
 
 
@@ -289,7 +296,7 @@ async function drawingapp() {
 async function preload() {
     //textures is a list of textures available to use, and populates the textures list
     //addTextures();
-    addMeshes(filepath);
+    loadMesh(currmeshindex);
      //lights is a list of lights in the scene, and populates the lights list
     addLights();
     
@@ -319,19 +326,14 @@ function addLights() {
     lights.push(directionalLightBottom);
     
 }
-function addMeshes(file_path) {
-    //rendering a simple cube for now (CHANGE TO A 3D MESH)
-
-    //lets just do a cube to debug for now
-    //material = new THREE.MeshPhongMaterial({color:0xffffff});
-	// mesh = new THREE.Mesh( new THREE.BoxGeometry( 5,5,5 ), material );
-    // console.log(mesh)
-    // scene.add(mesh);
-    // meshes.push(mesh); 
+function loadMesh() {
+    //get rid of the mesh if it's in the scene
+    scene.remove(mesh)
+    filepath = meshes[currmeshindex];
     const loader = new GLTFLoader();
     //loading the cow
     loader.load(
-        file_path,
+        filepath,
         function (gltf) {
             const modelGeometry = gltf.scene.children[0].geometry;
             var loader = new THREE.TextureLoader();
@@ -352,6 +354,7 @@ function addMeshes(file_path) {
         });
 
 }
+
 
 //event listeners
 window.addEventListener("resize", function() {
