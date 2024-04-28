@@ -106,7 +106,8 @@ async function drawingapp() {
         ctx.beginPath(); // creating new path to draw
 
         ctx.lineWidth = brushWidth; // passing brushSize as line width
-        ctx.strokeStyle = selectedColor; // passing selectedColor as stroke style
+        ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
+
         // copying canvas data & passing as snapshot value.. this avoids dragging the image
         snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
