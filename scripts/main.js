@@ -223,7 +223,27 @@ async function drawingapp() {
         // Useful variables to keep track of:
         //  canvas - the drawing app canvas
         //  ctx - a CanvasRenderingContext2D instance. Handles all the 2D drawing stuff
-        console.log("does nothing rn")
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    material.map = new THREE.CanvasTexture(canvas);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+        input.click();
+
+
+        console.log("does smthg rn")
     });
     importMesh.addEventListener("click", () => {
         // TODO: HANDLE LOADING A MESH into the scene and replace it with the cow. 
@@ -236,6 +256,36 @@ async function drawingapp() {
         // filepath - filepath of the imported mesh local to this repo
         // addMeshes(file_path) - takes a string of a filepath as an argument to load and 
         //    reassign the variable "mesh" to the newly imported mesh
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.glb, .gltf'; // Accept GLTF and GLB files
+        input.onchange = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            const loader = new THREE.GLTFLoader();
+            loader.load(
+                url,
+                function (gltf) {
+                    if (mesh) {
+                        scene.remove(mesh);
+                    }
+                    mesh = gltf.scene;
+                    scene.add(mesh);
+    
+                    controls.reset();
+                },
+                function (xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                },
+                function (error) {
+                    console.error('An error occurred while loading the GLTF model:', error);
+                }
+            );
+        };
+        input.click();
+
+
         console.log("does nothing rn")
     });
     generateMesh.addEventListener("click", () => {
