@@ -49,7 +49,6 @@ const canvas = document.getElementById("drawingapp"),
     importMesh = document.querySelector(".import-glb"),
     ctx = canvas.getContext("2d");
 material.map = new THREE.CanvasTexture(canvas);
-material.map.flipY = false;
 // global variables with default value
 
 var loaded = false;
@@ -86,12 +85,12 @@ for (let j = 0; j < index.count; j += 3) {
     let i2 = index.array[j + 2]*2;
     console.log(i0, i1, i2);
     ctx.beginPath(); // creating new path to draw
-    ctx.moveTo(uv.array[i0] * canvas.width, uv.array[i0 + 1] * canvas.height); // creating line according to the mouse pointer
-    ctx.lineTo(uv.array[i1] * canvas.width, uv.array[i1 + 1] * canvas.height); // creating line according to the mouse pointer
+    ctx.moveTo(uv.array[i0] * canvas.width, (1 - uv.array[i0 + 1]) * canvas.height); // creating line according to the mouse pointer
+    ctx.lineTo(uv.array[i1] * canvas.width, (1 - uv.array[i1 + 1]) * canvas.height); // creating line according to the mouse pointer
     ctx.stroke(); // drawing/filling line with color
-    ctx.lineTo(uv.array[i2] * canvas.width, uv.array[i2 + 1] * canvas.height); // creating line according to the mouse pointer
+    ctx.lineTo(uv.array[i2] * canvas.width, (1 - uv.array[i2 + 1]) * canvas.height); // creating line according to the mouse pointer
     ctx.stroke(); // drawing/filling line with color
-    ctx.lineTo(uv.array[i0] * canvas.width, uv.array[i0 + 1] * canvas.height); // creating line according to the mouse pointer
+    ctx.lineTo(uv.array[i0] * canvas.width, (1 - uv.array[i0 + 1]) * canvas.height); // creating line according to the mouse pointer
     ctx.stroke(); // drawing/filling line with color
     ctx.closePath();
     // ctx.stroke(); // drawing/filling line with color
@@ -174,7 +173,6 @@ function drawingapp() {
                 ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
                 ctx.stroke(); // drawing/filling line with color
                 material.map = new THREE.CanvasTexture(canvas);
-                material.map.flipY = false;
             } else if (drawingOnMesh) {
                 raycaster.setFromCamera(pointer, camera);
                 //cast a ray and find uv coordinates to draw onto
@@ -202,7 +200,6 @@ function drawingapp() {
                     lastBrushY = brushY;
 
                     material.map = new THREE.CanvasTexture(canvas);
-                    material.map.flipY = false;
                 }
             }
         }
@@ -248,7 +245,6 @@ function drawingapp() {
     clearCanvas.addEventListener("click", () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
         material.map = new THREE.CanvasTexture(canvas);
-        material.map.flipY = false;
         setCanvasBackground();
     });
     saveImg.addEventListener("click", () => {
