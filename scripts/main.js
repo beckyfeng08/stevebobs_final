@@ -39,6 +39,7 @@ let lights = [];
 const canvas = document.getElementById("drawingapp"),
 toolBtns = document.querySelectorAll(".tool"),
 fillColor = document.querySelector("#fill-color"),
+opacitySlider = document.querySelector("#opacity-slider"),
 sizeSlider = document.querySelector("#size-slider"),
 colorBtns = document.querySelectorAll(".colors .option"),
 colorPicker = document.querySelector("#color-picker"),
@@ -63,6 +64,7 @@ async function drawingapp() {
         isDrawing = false,
         selectedTool = "brush",
         brushWidth = 5,
+        opacity = 1,
         selectedColor = "#000";
     const setCanvasBackground = () => {
         // setting whole canvas background to white, so the downloaded img background will be white
@@ -94,9 +96,8 @@ async function drawingapp() {
         isDrawing = true;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-        // ctx.arc(prevMouseX, prevMouseY, brushWidth/2.0, 0, 2*Math.PI); // for single click paint case
         ctx.fillStyle = selectedColor; // passing selectedColor as fill style
-        // ctx.fill();
+        ctx.globalAlpha = opacity;
         ctx.beginPath(); // creating new path to draw
 
         ctx.lineWidth = brushWidth; // passing brushSize as line width
@@ -139,9 +140,9 @@ async function drawingapp() {
                   
                     var brushX = intersection.uv.x*canvas.width;
                     var brushY = (1 - intersection.uv.y)*canvas.height; //top left corner is 0
-                    console.log(brushY, lastBrushY)
-                    if ((Math.abs(brushX - lastBrushX) < 10) && (Math.abs(brushY - lastBrushY) < 10)) {
-                        console.log("poop")
+        
+                    if ((Math.abs(brushX - lastBrushX) < 30) && (Math.abs(brushY - lastBrushY) < 30)) {
+              
                         ctx.lineTo(brushX, brushY); // creating line according to the mouse pointer
                         ctx.stroke(); // drawing/filling line with color
                         //saving the last positions
@@ -171,6 +172,10 @@ async function drawingapp() {
     });
     sizeSlider.addEventListener("change", () => { // passing slider value as brushSize
         brushWidth = sizeSlider.value;
+    });
+
+    opacitySlider.addEventListener("change", () => { // passing slider value as opacity 
+        opacity = opacitySlider.value/100.0;
     });
     // brush size cursor display change
     document.onmousemove = function(e){
