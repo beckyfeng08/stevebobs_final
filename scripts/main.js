@@ -61,15 +61,29 @@ material.map = new THREE.CanvasTexture(canvas);
 //calls
 drawingapp();
 await preload();
-drawUV();
-animate();
+
+// drawUV();
+
+
+canvas.width = canvas.offsetWidth;
+canvas.height = canvas.offsetHeight;
+uvmesh.width = uvmesh.offsetWidth;
+uvmesh.height = uvmesh.offsetHeight;
+ctx.fillStyle = "#fff";
+
+
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+        ctx.fillStyle = "#000";
+        console.log("hello")
+        animate();
 
 function drawUV() {
     ctx_uv.lineCap = "round";
     ctx_uv.lineJoin = "round";
     ctx_uv.fillStyle = "#fff"; // passing selectedColor as fill style
-    ctx_uv.lineWidth = 1; // passing brushSize as line width
-
+    ctx_uv.lineWidth = 1; //assing brushSize as line width
+    console.log("third")
     const uv = mesh.geometry.getAttribute('uv');
     let index = mesh.geometry.getIndex();
     for (let j = 0; j < index.count; j += 3) {
@@ -90,6 +104,7 @@ function drawUV() {
 
 //Drawing app for the canvas
 async function drawingapp() {
+    console.log("first")
     let drawingOnMesh = false;
     let drawingOnCanvas = false;
     let prevMouseX, prevMouseY, snapshot,
@@ -111,7 +126,7 @@ async function drawingapp() {
         canvas.height = canvas.offsetHeight;
         uvmesh.width = uvmesh.offsetWidth;
         uvmesh.height = uvmesh.offsetHeight;
-        console.log("hello")
+      
         setCanvasBackground();
     });
 
@@ -360,6 +375,7 @@ async function drawingapp() {
 
 //main functions
 async function preload() {
+    console.log("second")
     return Promise.all([loadMesh(), addLights()]).then(() => {
         console.log("Loading done.");
     })
@@ -368,6 +384,7 @@ async function preload() {
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
+  
     renderer.render(scene, camera);
 }
 async function addLights() {
