@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { GUI } from 'dat.gui'
+// import { GUI } from 'dat.gui'
 import * as jquery from "https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js";
 import { shininess } from 'three/examples/jsm/nodes/Nodes.js';
 
@@ -62,21 +62,18 @@ material.map = new THREE.CanvasTexture(canvas);
 drawingapp();
 await preload();
 
-// drawUV();
-
 
 canvas.width = canvas.offsetWidth;
 canvas.height = canvas.offsetHeight;
 uvmesh.width = uvmesh.offsetWidth;
 uvmesh.height = uvmesh.offsetHeight;
 ctx.fillStyle = "#fff";
+ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-        ctx.fillStyle = "#000";
-        console.log("hello")
-        animate();
+ctx.fillStyle = "#000";
+drawUV();
+console.log(mesh)
+animate();
 
 function drawUV() {
     ctx_uv.lineCap = "round";
@@ -115,10 +112,13 @@ async function drawingapp() {
         selectedColor = "#000";
     const setCanvasBackground = () => {
         // setting whole canvas background to white, so the downloaded img background will be white
+        ctx.globalAlpha = 1;
         ctx.fillStyle = "#fff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        material.map = new THREE.CanvasTexture(canvas);
         ctx.fillStyle = selectedColor;
-        // ctx_uv.clearRect(0, 0, uvmesh.width, uvmesh.height);
+        ctx.globalAlpha = opacity;
+        //ctx_uv.clearRect(0, 0, uvmesh.width, uvmesh.height);
     }
     window.addEventListener("load", () => {
         // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
@@ -126,7 +126,7 @@ async function drawingapp() {
         canvas.height = canvas.offsetHeight;
         uvmesh.width = uvmesh.offsetWidth;
         uvmesh.height = uvmesh.offsetHeight;
-      
+      console.log("lododood")
         setCanvasBackground();
     });
 
@@ -256,8 +256,9 @@ async function drawingapp() {
         }
     });
     clearCanvas.addEventListener("click", () => {
+        ctx.fillStyle ='#fff';
         ctx.fillRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
-        material.map = new THREE.CanvasTexture(canvas);
+        
         setCanvasBackground();
     });
     saveImg.addEventListener("click", () => {
@@ -280,7 +281,9 @@ async function drawingapp() {
                 img.onload = function () {
                     ctx.clearRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
                     setCanvasBackground();
+                    ctx.globalAlpha = 1;
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    ctx.globalAlpha = opacity;
                     material.map = new THREE.CanvasTexture(canvas);
 
                 };
