@@ -1,0 +1,38 @@
+
+/* Import Google font - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Lunasima:wght@400;500;600&display=swap');
+* {
+    font-family: 'Lunasima', serif;
+}
+h1{
+    display: block;
+    width: 100%; /* Optional, ensures it spans the full width */
+    margin: 0 auto; /* Centers the header horizontally */
+}
+
+body {
+    background: #B19CD9;
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    gap: 10px;
+    padding: 10px;
+    max-width: 1050px;
+}
+
+/* ui elements */
+#circle{
+    width: 5px;
+    height: 5px;
+    border:1px solid red;
+    border-radius: 50%;
+    position: fixed;
+    transform: translateX(-50%) translateY(-50%); /*not sure why Y is offset like this*/
+    top: 50%;
+    left: -100%;
+    z-index: 3;
+    pointer-events: none;
+}

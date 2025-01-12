@@ -12,6 +12,11 @@
     box-sizing: border-box;
     font-family: 'Lunasima', serif;
 }
+h1{
+    display: block;
+    width: 100%; /* Optional, ensures it spans the full width */
+    margin: 0 auto; /* Centers the header horizontally */
+}
 
 #circle{
     width: 5px;

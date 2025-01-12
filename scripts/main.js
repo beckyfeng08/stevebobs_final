@@ -2,92 +2,145 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+class SteveBobs {
+    constructor() {
+        
+        this.init_renderer();
+        this.init_data();
+        this.init_htmllinking();
+    }
 
-//importing local files
+    init_renderer()
+    {
+        this.scene = new THREE.Scene();
+        this.container = document.getElementById("viewer");
+        
+        this.camera = new THREE.PerspectiveCamera(50, this.container.clientWidth / this.container.clientHeight, 0.1, 1000);
+        this.camera.position.z = 15;
+        this.renderer = new THREE.WebGLRenderer();
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+        this.container.appendChild(this.renderer.domElement);
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        this.raycaster = new THREE.Raycaster();
+        this.pointer = new THREE.Vector2();
+    }
 
-//initializing the window and some important variables
-const scene = new THREE.Scene();
+    init_data() {
+        this.showUV = true;
+        this.meshes = ["/models/cow_unwrapped.gltf", "/models/animeface.gltf", "/models/bunny.gltf"]
+        this.lights = [];
+        this.showUV = true;
+        this.currmeshindex = 0;
+        this.material = new THREE.MeshPhongMaterial({
+            side: THREE.DoubleSide});
+        this.mesh;
+    }
 
-const container = document.getElementById("viewer");
+    init_htmllinking()
+    {
+        //drawing app init items
+        this.canvas = document.getElementById("drawingapp");
+        this.uvmesh = document.getElementById("uv-layer");
+        this.toolBtns = document.querySelectorAll(".tool");
+        this.fillColor = document.querySelector("#fill-color");
+        this.opacitySlider = document.querySelector("#opacity-slider");
+        this.sizeSlider = document.querySelector("#size-slider");
+        this.colorBtns = document.querySelectorAll(".colors .option");
+        this.uvBtn = document.getElementById("uv-button");
+        this.colorPicker = document.querySelector("#color-picker");
+        this.generateMesh = document.querySelector(".generate-mesh");
+        this.clearCanvas = document.querySelector(".clear-canvas");
+        this.saveImg = document.querySelector(".save-img");
+        this.importImg = document.querySelector(".import-img");
+        this.importMesh = document.querySelector(".import-glb");
+        this.ctx = this.canvas.getContext("2d");
+        this.ctx_uv = this.uvmesh.getContext("2d");
+        console.log(this.canvas)
+        this.material.map = new THREE.CanvasTexture(this.canvas);
+    }
 
-const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
-camera.position.z = 15;
+    load_mesh(filepath)
+    {
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(container.clientWidth, container.clientHeight);
+        this.scene.remove(this.mesh)
+        filepath = this.meshes[this.currmeshindex];
+        const loader = new GLTFLoader();
+        //loading the cow
+        return loader.loadAsync(
+            filepath,
 
-container.appendChild(renderer.domElement);
+            // if 100% means loaded
+            function (xhr) {
+                console.log("Mesh loaded successfully");
 
-const controls = new OrbitControls(camera, renderer.domElement);
+            }).then((gltf) => {
+                const modelGeometry = gltf.scene.children[0].geometry;
 
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
+                this.mesh = new THREE.Mesh(modelGeometry, this.material);
+                this.mesh.scale.set(5, 5, 5);
+                this.scene.add(this.mesh);
+                console.log(this.mesh)
+                if (this.showUV) {
+                    this.ctx_uv.clearRect(0, 0, this.uvmesh.width, this.uvmesh.height);
+                    this.drawUV();
+                }
+            })
+            .catch((error) => {
+                console.error('An error happened', error);
+            });
+    }
 
+    drawUV() {
+        this.ctx_uv.lineCap = "round";
+        this.ctx_uv.lineJoin = "round";
+        this.ctx_uv.fillStyle = "#fff"; // passing selectedColor as fill style
+        this.ctx_uv.lineWidth = 1; // passing brushSize as line width
+    
+        const uv = this.mesh.geometry.getAttribute('uv');
+        let index = this.mesh.geometry.getIndex();
+        for (let j = 0; j < index.count; j += 3) {
+            let i0 = index.array[j] * 2;
+            let i1 = index.array[j + 1] * 2;
+            let i2 = index.array[j + 2] * 2;
+            this.ctx_uv.beginPath();
+            this.ctx_uv.moveTo(uv.array[i0] * this.uvmesh.width, (1 - uv.array[i0 + 1]) * this.uvmesh.height);
+            this.ctx_uv.lineTo(uv.array[i1] * this.uvmesh.width, (1 - uv.array[i1 + 1]) * this.uvmesh.height);
+            this.ctx_uv.stroke();
+            this.ctx_uv.lineTo(uv.array[i2] *this.uvmesh.width, (1 - uv.array[i2 + 1]) * this.uvmesh.height);
+            this.ctx_uv.stroke();
+            this.ctx_uv.lineTo(uv.array[i0] * this.uvmesh.width, (1 - uv.array[i0 + 1]) * this.uvmesh.height);
+            this.ctx_uv.stroke();
+            this.ctx_uv.closePath();
+        }
+    }
 
-//initiailizing materials first so the canvas can read off of it
-let filepath = '../models/animeface.gltf'; //for addMeshes
-let material = new THREE.MeshPhongMaterial({
-    side: THREE.DoubleSide,
-
-}); //for canvas initialization
-let mesh;
-let currmeshindex = 0;
-let meshes = ["/models/cow_unwrapped.gltf", "/models/animeface.gltf", "/models/bunny.gltf"]
-let lights = [];
-let showUV = true;
-
-
-//drawing app init items
-const canvas = document.getElementById("drawingapp"),
-    uvmesh = document.getElementById("uv-layer"),
-    toolBtns = document.querySelectorAll(".tool"),
-    fillColor = document.querySelector("#fill-color"),
-    opacitySlider = document.querySelector("#opacity-slider"),
-    sizeSlider = document.querySelector("#size-slider"),
-    colorBtns = document.querySelectorAll(".colors .option"),
-    uvBtn = document.getElementById("uv-button"),
-    colorPicker = document.querySelector("#color-picker"),
-    generateMesh = document.querySelector(".generate-mesh"),
-    clearCanvas = document.querySelector(".clear-canvas"),
-    saveImg = document.querySelector(".save-img"),
-    importImg = document.querySelector(".import-img"),
-    importMesh = document.querySelector(".import-glb"),
-    ctx = canvas.getContext("2d"),
-    ctx_uv = uvmesh.getContext("2d");
-material.map = new THREE.CanvasTexture(canvas);
-
-//calls
-drawingapp();
-await preload();
-drawUV();
-animate();
-
-function drawUV() {
-    ctx_uv.lineCap = "round";
-    ctx_uv.lineJoin = "round";
-    ctx_uv.fillStyle = "#fff"; // passing selectedColor as fill style
-    ctx_uv.lineWidth = 1; // passing brushSize as line width
-
-    const uv = mesh.geometry.getAttribute('uv');
-    let index = mesh.geometry.getIndex();
-    for (let j = 0; j < index.count; j += 3) {
-        let i0 = index.array[j] * 2;
-        let i1 = index.array[j + 1] * 2;
-        let i2 = index.array[j + 2] * 2;
-        ctx_uv.beginPath();
-        ctx_uv.moveTo(uv.array[i0] * uvmesh.width, (1 - uv.array[i0 + 1]) * uvmesh.height);
-        ctx_uv.lineTo(uv.array[i1] * uvmesh.width, (1 - uv.array[i1 + 1]) * uvmesh.height);
-        ctx_uv.stroke();
-        ctx_uv.lineTo(uv.array[i2] * uvmesh.width, (1 - uv.array[i2 + 1]) * uvmesh.height);
-        ctx_uv.stroke();
-        ctx_uv.lineTo(uv.array[i0] * uvmesh.width, (1 - uv.array[i0 + 1]) * uvmesh.height);
-        ctx_uv.stroke();
-        ctx_uv.closePath();
+    add_lights() {
+        // Adding lighting
+        const directionalLightTop = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLightTop.position.set(0, 1, 0);
+        const directionalLightBottom = new THREE.DirectionalLight(0xffffff, 0.3);
+        directionalLightBottom.position.set(-1, -1, 0);
+        const hemlight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
+        this.scene.add(hemlight);
+        this.scene.add(directionalLightTop);
+        this.scene.add(directionalLightBottom);
+        this.lights.push(hemlight);
+        this.lights.push(directionalLightTop);
+        this.lights.push(directionalLightBottom);
+       
     }
 }
 
+
+let stevebobs = new SteveBobs(); // sets up webgl and canvas
+stevebobs.load_mesh('../models/cow_unwrapped.gltf');
+stevebobs.add_lights();
+//calls on update
+drawingapp();
+animate();
+
 //Drawing app for the canvas
-async function drawingapp() {
+function drawingapp() {
     let drawingOnMesh = false;
     let drawingOnCanvas = false;
     let prevMouseX, prevMouseY, snapshot,
@@ -98,20 +151,19 @@ async function drawingapp() {
         selectedColor = "#000";
     const setCanvasBackground = () => {
         // setting whole canvas background to white, so the downloaded img background will be white
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = selectedColor;
-        ctx_uv.clearRect(0, 0, uvmesh.width, uvmesh.height);
+        stevebobs.ctx.fillStyle = "#fff";
+        stevebobs.ctx.fillRect(0, 0, stevebobs.canvas.width, stevebobs.canvas.height);
+        stevebobs.ctx.fillStyle = selectedColor;
+        stevebobs.ctx_uv.clearRect(0, 0, stevebobs.uvmesh.width, stevebobs.uvmesh.height);
     }
     window.addEventListener("load", () => {
         // setting canvas width/height.. offsetwidth/height returns viewable width/height of an element
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-        uvmesh.width = uvmesh.offsetWidth;
-        uvmesh.height = uvmesh.offsetHeight;
+        stevebobs.canvas.width = stevebobs.canvas.offsetWidth;
+        stevebobs.canvas.height = stevebobs.canvas.offsetHeight;
+        stevebobs.uvmesh.width = stevebobs.uvmesh.offsetWidth;
+        stevebobs.uvmesh.height = stevebobs.uvmesh.offsetHeight;
         setCanvasBackground();
     });
-
 
     let lastBrushX;
     let lastBrushY;
@@ -122,74 +174,73 @@ async function drawingapp() {
         prevMouseY = e.offsetY; // passing current mouseY position as prevMouseY value
 
         isDrawing = true;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-        ctx.fillStyle = selectedColor; // passing selectedColor as fill style
-        ctx.globalAlpha = opacity;
-        ctx.beginPath(); // creating new path to draw
+        stevebobs.ctx.lineCap = "round";
+        stevebobs.ctx.lineJoin = "round";
+        stevebobs.ctx.fillStyle = selectedColor; // passing selectedColor as fill style
+        stevebobs.ctx.globalAlpha = opacity;
+        stevebobs.ctx.beginPath(); // creating new path to draw
 
-        ctx.lineWidth = brushWidth; // passing brushSize as line width
-        ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
+        stevebobs.ctx.lineWidth = brushWidth; // passing brushSize as line width
+        stevebobs.ctx.strokeStyle = selectedTool === "eraser" ? "#fff" : selectedColor;
 
         // copying canvas data & passing as snapshot value.. this avoids dragging the image
-        snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        snapshot = stevebobs.ctx.getImageData(0, 0, stevebobs.canvas.width, stevebobs.canvas.height);
 
         //setting lastbrushx and lastbrushy
-        raycaster.setFromCamera(pointer, camera);
+        stevebobs.raycaster.setFromCamera(stevebobs.pointer, stevebobs.camera);
         //cast a ray and find uv coordinates to draw onto
-        const intersects = raycaster.intersectObjects(scene.children);
+        const intersects = stevebobs.raycaster.intersectObjects(stevebobs.scene.children);
         if (intersects.length > 0) {
-            controls.enabled = false;
+            stevebobs.controls.enabled = false;
             //the raycaster found a face to paint on
             const intersection = intersects[0];
             //calculating brsuh positions from uv coordinates
-            lastBrushX = intersection.uv.x * canvas.width;
-            lastBrushY = (1 - intersection.uv.y) * canvas.height; //top left corner is 0
+            lastBrushX = intersection.uv.x * stevebobs.canvas.width;
+            lastBrushY = (1 - intersection.uv.y) * stevebobs.canvas.height; //top left corner is 0
         }
 
     }
     const drawing = (e) => {
 
         if (!isDrawing) return; // if isDrawing is false return from here
-        ctx.putImageData(snapshot, 0, 0); // adding copied canvas data on to this canvas
+        stevebobs.ctx.putImageData(snapshot, 0, 0); // adding copied canvas data on to this canvas
         if (selectedTool === "brush" || selectedTool === "eraser") {
             if (drawingOnCanvas) {
-                ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
-                ctx.stroke(); // drawing/filling line with color
-                material.map = new THREE.CanvasTexture(canvas);
+                stevebobs.ctx.lineTo(e.offsetX, e.offsetY); // creating line according to the mouse pointer
+                stevebobs.ctx.stroke(); // drawing/filling line with color
+                stevebobs.material.map = new THREE.CanvasTexture(stevebobs.canvas);
             } else if (drawingOnMesh) {
-                raycaster.setFromCamera(pointer, camera);
+                stevebobs.raycaster.setFromCamera(stevebobs.pointer, stevebobs.camera);
                 //cast a ray and find uv coordinates to draw onto
-                const intersects = raycaster.intersectObjects(scene.children);
+                const intersects = stevebobs.raycaster.intersectObjects(stevebobs.scene.children);
                 if (intersects.length > 0) {
-                    controls.enabled = false;
+                    stevebobs.controls.enabled = false;
                     //the raycaster found a face to paint on
                     const intersection = intersects[0];
                     //calculating brsuh positions from uv coordinates
 
-                    var brushX = intersection.uv.x * canvas.width;
-                    var brushY = (1 - intersection.uv.y) * canvas.height; //top left corner is 0
+                    var brushX = intersection.uv.x * stevebobs.canvas.width;
+                    var brushY = (1 - intersection.uv.y) * stevebobs.canvas.height; //top left corner is 0
 
                     if ((Math.abs(brushX - lastBrushX) < 30) && (Math.abs(brushY - lastBrushY) < 30)) {
 
-                        ctx.lineTo(brushX, brushY); // creating line according to the mouse pointer
-                        ctx.stroke(); // drawing/filling line with color
+                        stevebobs.ctx.lineTo(brushX, brushY); // creating line according to the mouse pointer
+                        stevebobs.ctx.stroke(); // drawing/filling line with color
                         //saving the last positions
                     } else {
-                        ctx.lineTo(lastBrushX, lastBrushY); // creating line according to the mouse pointer
-                        ctx.stroke();
+                        stevebobs.ctx.lineTo(lastBrushX, lastBrushY); // creating line according to the mouse pointer
+                        stevebobs.ctx.stroke();
                         startDraw(e);
                     }
                     lastBrushX = brushX;
                     lastBrushY = brushY;
 
-                    material.map = new THREE.CanvasTexture(canvas);
+                    stevebobs.material.map = new THREE.CanvasTexture(stevebobs.canvas);
                 }
             }
         }
-
     }
-    toolBtns.forEach(btn => {
+    stevebobs.toolBtns.forEach(btn => {
         btn.addEventListener("click", () => { // adding click event to all tool option
             // removing active class from the previous option and adding on current clicked option
             document.querySelector(".options .active").classList.remove("active");
@@ -197,12 +248,12 @@ async function drawingapp() {
             selectedTool = btn.id;
         });
     });
-    sizeSlider.addEventListener("change", () => { // passing slider value as brushSize
-        brushWidth = sizeSlider.value;
+    stevebobs.sizeSlider.addEventListener("change", () => { // passing slider value as brushSize
+        brushWidth = stevebobs.sizeSlider.value;
     });
 
-    opacitySlider.addEventListener("change", () => { // passing slider value as opacity
-        opacity = opacitySlider.value / 100.0;
+    stevebobs.opacitySlider.addEventListener("change", () => { // passing slider value as opacity
+        opacity = stevebobs.opacitySlider.value / 100.0;
     });
     // brush size cursor display change
     document.onmousemove = function (e) {
@@ -212,7 +263,7 @@ async function drawingapp() {
         circle.style.width = brushWidth + "px";
         circle.style.height = brushWidth + "px";
     }
-    colorBtns.forEach(btn => {
+    stevebobs.colorBtns.forEach(btn => {
         btn.addEventListener("click", () => { // adding click event to all color button
             // removing selected class from the previous option and adding on current clicked option
             document.querySelector(".options .selected").classList.remove("selected");
@@ -221,31 +272,31 @@ async function drawingapp() {
             selectedColor = window.getComputedStyle(btn).getPropertyValue("background-color");
         });
     });
-    colorPicker.addEventListener("change", () => {
+    stevebobs.colorPicker.addEventListener("change", () => {
         // passing picked color value from color picker to last color btn background
-        colorPicker.parentElement.style.background = colorPicker.value;
-        colorPicker.parentElement.click();
+        stevebobs.colorPicker.parentElement.style.background = stevebobs.colorPicker.value;
+        stevebobs.colorPicker.parentElement.click();
     });
-    uvBtn.addEventListener("click", () => {
-        showUV = !showUV;
-        if (showUV) {
-            drawUV();
+    stevebobs.uvBtn.addEventListener("click", () => {
+        stevebobs.showUV = !stevebobs.showUV;
+        if (stevebobs.showUV) {
+            stevebobs.drawUV();
         } else {
-            ctx_uv.clearRect(0, 0, uvmesh.width, uvmesh.height); // clearing whole canvas
+            stevebobs.ctx_uv.clearRect(0, 0, stevebobs.uvmesh.width, stevebobs.uvmesh.height); // clearing whole canvas
         }
     });
-    clearCanvas.addEventListener("click", () => {
-        ctx.fillRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
-        material.map = new THREE.CanvasTexture(canvas);
+    stevebobs.clearCanvas.addEventListener("click", () => {
+        stevebobs.ctx.fillRect(0, 0, stevebobs.canvas.width, stevebobs.canvas.height); // clearing whole canvas
+        stevebobs.material.map = new THREE.CanvasTexture(stevebobs.canvas);
         setCanvasBackground();
     });
-    saveImg.addEventListener("click", () => {
+    stevebobs.saveImg.addEventListener("click", () => {
         const link = document.createElement("a"); // creating <a> element
         link.download = `${Date.now()}.png`; // passing current date as link download value
-        link.href = canvas.toDataURL(); // passing canvasData as link href value
+        link.href = stevebobs.canvas.toDataURL(); // passing canvasData as link href value
         link.click(); // clicking link to download image
     });
-    importImg.addEventListener("click", () => {
+    stevebobs.importImg.addEventListener("click", () => {
 
         const input = document.createElement('input');
         input.type = 'file';
@@ -257,11 +308,10 @@ async function drawingapp() {
             reader.onload = function (event) {
                 const img = new Image();
                 img.onload = function () {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height); // clearing whole canvas
+                    stevebobs.ctx.clearRect(0, 0, stevebobs.canvas.width, stevebobs.canvas.height); // clearing whole canvas
                     setCanvasBackground();
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    material.map = new THREE.CanvasTexture(canvas);
-
+                    stevebobs.ctx.drawImage(img, 0, 0, stevebobs.canvas.width, stevebobs.canvas.height);
+                    stevebobs.material.map = new THREE.CanvasTexture(stevebobs.canvas);
                 };
                 img.src = event.target.result;
             };
@@ -270,58 +320,47 @@ async function drawingapp() {
         input.click();
 
     });
-    importMesh.addEventListener("click", () => {
-        // TODO: HANDLE LOADING A MESH into the scene and replace it with the cow.
-        // You may wanna read this for more context:
-        // This thread may help: https://stackoverflow.com/questions/67864724/threejs-load-gltf-model-directly-from-file-input
-        // creating urls: https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL_static
-        //this guy does the same thing: https://gltf-viewer.donmccurdy.com
-
-        //Useful variables to keep track of:
-        // filepath - filepath of the imported mesh local to this repo
-        // addMeshes(file_path) - takes a string of a filepath as an argument to load and
-        //    reassign the variable "mesh" to the newly imported mesh
-        const input = document.createElement('input');
+    stevebobs.importMesh.addEventListener("click", () => {
+       const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.glb, .gltf'; // Accept GLTF and GLB files
         input.onchange = async function (event) {
             const file = event.target.files[0];
-            if (!file) return;
+            if (!file)  return;
             const url = URL.createObjectURL(file);
-            meshes.push(url)
-            currmeshindex = meshes.length - 1
-            await loadMesh(currmeshindex)
+            stevebobs.meshes.push(url);
+            stevebobs.currmeshindex = stevebobs.meshes.length - 1;
+            await stevebobs.load_mesh(stevebobs.currmeshindex);
         };
+        stevebobs.load_mesh(stevebobs.currmeshindex);
         input.click();
 
-
-        console.log("does nothing rn")
     });
-    generateMesh.addEventListener("click", async () => {
-        currmeshindex = (currmeshindex + 1) % meshes.length;
-        await loadMesh()
+    stevebobs.generateMesh.addEventListener("click", async () => {
+        stevebobs.currmeshindex = (stevebobs.currmeshindex + 1) % stevebobs.meshes.length;
+        await stevebobs.load_mesh()
     });
 
 
-    canvas.addEventListener("mousedown", (event) => {
+    stevebobs.canvas.addEventListener("mousedown", (event) => {
         drawingOnMesh = false;
         drawingOnCanvas = true;
         startDraw(event);
 
     });
-    canvas.addEventListener("mousemove", drawing);
-    canvas.addEventListener("mouseup", () => {
-        controls.enabled = true;
+    stevebobs.canvas.addEventListener("mousemove", drawing);
+    stevebobs.canvas.addEventListener("mouseup", () => {
+        stevebobs.controls.enabled = true;
         drawingOnMesh = false;
         drawingOnCanvas = false;
         isDrawing = false;
     });
 
     //event listeners for the 3d viewer
-    renderer.domElement.addEventListener('mousedown', (event) => {
-        raycaster.setFromCamera(pointer, camera);
-        raycaster.intersectObjects(scene.children)
-        if (raycaster.intersectObjects(scene.children).length > 0) {
+    stevebobs.renderer.domElement.addEventListener('mousedown', (event) => {
+        stevebobs.raycaster.setFromCamera(stevebobs.pointer, stevebobs.camera);
+        stevebobs.raycaster.intersectObjects(stevebobs.scene.children)
+        if (stevebobs.raycaster.intersectObjects(stevebobs.scene.children).length > 0) {
             drawingOnMesh = true;
         }
         drawingOnCanvas = false;
@@ -329,11 +368,11 @@ async function drawingapp() {
 
 
     });
-    renderer.domElement.addEventListener('mousemove', (event) => {
+    stevebobs.renderer.domElement.addEventListener('mousemove', (event) => {
         drawing(event);
     });
-    renderer.domElement.addEventListener('mouseup', () => {
-        controls.enabled = true;
+    stevebobs.renderer.domElement.addEventListener('mouseup', () => {
+        stevebobs.controls.enabled = true;
         drawingOnMesh = false;
         drawingOnCanvas = false;
         isDrawing = false;
@@ -345,86 +384,23 @@ async function drawingapp() {
 
         // calculate pointer position in normalized device coordinates
         // (-1 to +1) for both components
-        pointer.x = ((event.pageX - container.offsetLeft) / container.offsetWidth) * 2 - 1;
-        pointer.y = - ((event.pageY - container.offsetTop) / container.offsetHeight) * 2 + 1;
-
-
+        stevebobs.pointer.x = ((event.pageX - stevebobs.container.offsetLeft) / stevebobs.container.offsetWidth) * 2 - 1;
+        stevebobs.pointer.y = - ((event.pageY - stevebobs.container.offsetTop) / stevebobs.container.offsetHeight) * 2 + 1;
     }
 }
 
-//main functions
-async function preload() {
-    return Promise.all([loadMesh(), addLights()]).then(() => {
-        console.log("Loading done.");
-    })
-}
-//helper functions
 function animate() {
     requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
+    stevebobs.controls.update();
+    stevebobs.renderer.render(stevebobs.scene, stevebobs.camera);
 }
-async function addLights() {
-    // Adding lighting
-    const directionalLightTop = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLightTop.position.set(0, 1, 0);
-    const directionalLightBottom = new THREE.DirectionalLight(0xffffff, 0.3);
-    directionalLightBottom.position.set(-1, -1, 0);
-    const hemlight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.7);
-    scene.add(hemlight);
-    scene.add(directionalLightTop);
-    scene.add(directionalLightBottom);
-    lights.push(hemlight);
-    lights.push(directionalLightTop);
-    lights.push(directionalLightBottom);
-    return Promise.resolve(1).then(() => { console.log("Loaded Lights.") });
-
-}
-async function loadMesh() {
-    //get rid of the mesh if it's in the scene
-    scene.remove(mesh)
-    filepath = meshes[currmeshindex];
-    const loader = new GLTFLoader();
-    //loading the cow
-    return loader.loadAsync(
-        filepath,
-
-        // if 100% means loaded
-        function (xhr) {
-            console.log("Mesh loaded successfully");
-
-        }).then((gltf) => {
-            const modelGeometry = gltf.scene.children[0].geometry;
-
-            mesh = new THREE.Mesh(modelGeometry, material);
-            mesh.scale.set(5, 5, 5);
-            scene.add(mesh);
-            console.log(mesh)
-            if (showUV) {
-                ctx_uv.clearRect(0, 0, uvmesh.width, uvmesh.height);
-                drawUV();
-            }
-        })
-        .catch((error) => {
-            console.error('An error happened', error);
-        });
-
-}
-
 
 //event listeners
 window.addEventListener("resize", function () {
-    var width = container.clientWidth;
-    var height = container.clientHeight;
-    renderer.setSize(width, height);
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
+    var width = stevebobs.container.clientWidth;
+    var height = stevebobs.container.clientHeight;
+    stevebobs.renderer.setSize(width, height);
+    stevebobs.camera.aspect = width / height;
+    stevebobs.camera.updateProjectionMatrix();
 });
 
-
-//error functions
-function assertListsSameSize(list1, list2) {
-    if (list1.length !== list2.length) {
-        throw new Error("Lists are not the same size");
-    }
-}
