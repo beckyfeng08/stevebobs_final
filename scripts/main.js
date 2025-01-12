@@ -1,9 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { GUI } from 'dat.gui'
-import * as jquery from "https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js";
-import { shininess } from 'three/examples/jsm/nodes/Nodes.js';
+
 
 //importing local files
 
