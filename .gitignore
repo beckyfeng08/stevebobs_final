@@ -174,3 +174,4 @@ dist
 # etc
 .DS_Store
 .package-lock.json
+package.json

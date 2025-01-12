@@ -1,22 +1,29 @@
-# stevebobs_final
+# Steve Bobs Mesh Painter 2.1
 
-## Resources below:
-- WebGL intro (videos): https://youtube.com/playlist?list=PLRtjMdoYXLf4aWJ5WJl8_vBnynl6st_sQ&si=6x4fH5g0hI6n3DUF
-- WebGL tutorial (documentation): https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial
-  Three JS:
-  - https://github.com/mrdoob/three.js/blob/master/examples/webgl_decals.html
-  - https://threejs.org
-  - https://www.youtube.com/watch?v=YK1Sw_hnm58
+This project uses Node JS to build an dmanage dependencies. You can install Node JS here: https://nodejs.org/en
+To build and run, enter the following in your command line:
+<code> git clone https://github.com/beckyfeng08/stevebobs_final.git</code>
 
-- decal to get normal line: https://threejs.org/examples/#webgl_decals
+<code>
+cd stevebobs_final
+</code>
 
-- Drawing app with vanilla javascript, html, css: https://www.youtube.com/watch?v=y84tBZo8GFo
-- Drawing app using React.JS: https://www.youtube.com/playlist?list=PLSxgVLtIB0IFmQGuVMSE_wDHPW5rq4Ik7
+Installing dependencies:
 
+Installing three js
+<code> 
+npm install --save three
+</code>
 
-## Goals
-- Finish watching and following video tutorials by Wednesday April 24
-- Finish project by April 29 Monday
-- FInish project writeup by April 20 Tuesday
+Installing vite
+<code>
+npm install --save-dev vite
+</code>
 
-  
+To run:
+<code>
+npx vite
+</code>
+
+Building and running instructions are taken from the threejs documentation here: https://threejs.org/docs/#manual/en/introduction/Installation
+
