@@ -8,13 +8,15 @@ To build and run, enter the following in your command line:
 <code>cd stevebobs_final</code>
 
 Installing dependencies:
-
-Installing three js
+<ul>
+<li>Installing three js
 <code> npm install --save three</code>
+</li>
 
-Installing vite
+<li>Installing vite
 <code>npm install --save-dev vite</code>
-
+</li>
+</ul>
 To run:<code>
 npx vite</code>
 
